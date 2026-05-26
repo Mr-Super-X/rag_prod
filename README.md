@@ -13,7 +13,7 @@
           ▼                          ▼                      ▼
    ┌──────────┐              ┌──────────────┐       ┌──────────┐
    │ PostgreSQL│              │  Ollama       │       │  Redis   │
-   │  元数据    │              │  LLM+Embedding│       │  缓存+B25 │
+   │  元数据    │              │  LLM+Embedding│       │  缓存+BM25 │
    └──────────┘              └──────────────┘       └──────────┘
                                      │
                               ┌──────┴──────┐
@@ -134,7 +134,7 @@ docker exec -it rag_prod-ollama-1 ollama pull qwen2.5:7b
 docker exec -it rag_prod-ollama-1 ollama pull bge-m3
 ```
 
-> **注意**：模型文件托管在 Docker Hub（`ollama/ollama`）和 Ollama 官方 registry，国内网络直连经常超时或中断。如果下载失败，需要：
+> **注意**：模型文件托管在 Ollama 官方 registry（`registry.ollama.ai`），国内网络直连经常超时或中断。如果下载失败，需要：
 > - 开启 VPN/代理后再执行
 > - 或者多次重试（Docker 支持断点续传，中断后重新执行会从中断处继续）
 > - Qwen2.5-7B 约 4.5GB，BGE-m3 约 1.2GB，总计约 5.7GB，网络不稳定时可能需要多轮拉取
@@ -317,6 +317,52 @@ npm test             # 运行测试
 npx drizzle-kit studio  # 数据库可视化管理
 ```
 
+## 故障排查
+
+### 启动后端报 "connect ECONNREFUSED"
+
+PostgreSQL 或 Redis 没启动。检查：
+
+```bash
+docker ps   # 确认 postgres 和 redis 两个容器都在运行
+```
+
+如果少了，重新 `docker-compose up -d`。
+
+### 上传文档后永远"处理中"
+
+大概率 Ollama 挂了或模型没拉。检查：
+
+```bash
+curl http://localhost:11434/api/tags   # 应返回模型列表含 qwen2.5:7b 和 bge-m3
+```
+
+如果 404 或空：确认 Ollama 在运行，且模型已拉取。
+
+### 问答返回 500 错误
+
+查看后端终端的报错日志。常见原因：
+- Ollama 离线（`docker ps` 看 ollama 容器状态）
+- 模型没拉（见上一条）
+- 内存不足（Qwen2.5-7B 需要 ~5GB）
+
+### 前端页面空白
+
+确认后端已启动（`npm run dev`），前端开发服务器已启动（`cd client && npm run dev`）。浏览器打开 F12 → Network 看 API 请求是否报错。
+
+### 想换更小的模型（加速 CPU 推理）
+
+```bash
+# 拉更小的模型
+docker exec -it rag_prod-ollama-1 ollama pull qwen2.5:3b
+
+# 修改 .env
+LLM_MODEL=qwen2.5:3b
+
+# 重启后端
+```
+> 注意：换 LLM 模型不需要重建向量索引。但换 Embedding 模型需要删掉 `data/lancedb/` 全部重新上传文档。
+
 ## 已知限制
 
 | 限制 | 影响 | 缓解 |
@@ -333,6 +379,7 @@ npx drizzle-kit studio  # 数据库可视化管理
 - [架构设计与实现细节](docs/架构设计与实现细节.md) — 项目全貌参考，面向开发者与 AI 扩展
 - [V1 开发实录：从方案到落地](docs/V1开发实录-从方案到落地.md) — 完整踩坑记录（16 个）
 - [小白部署指南：从本地到上线](docs/小白部署指南-从本地到上线.md) — 零基础部署到云服务器
+- [用户指南：从登录到精通](docs/用户指南-从登录到精通.md) — 给使用者的产品说明书
 
 ## License
 
