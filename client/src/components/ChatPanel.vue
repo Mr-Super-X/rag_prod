@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, nextTick, watch } from "vue";
-import { api } from "@/lib/api.js";
+import { streamChat } from "@/lib/api.js";
 import MessageBubble from "./MessageBubble.vue";
-import type { Message, ChunkSource, ApiResponse } from "@/types.js";
+import type { Message, ChunkSource } from "@/types.js";
 
 const props = defineProps<{ kbId: string }>();
 
@@ -45,27 +45,39 @@ async function send() {
   });
   await scrollDown();
 
-  try {
-    const res = await api.post<ChatResult>(`/kb/${props.kbId}/chat`, {
-      question: q,
-      conversationId: convId.value,
-    });
-    const data = res.data;
-    convId.value = data.conversationId;
+  // 创建占位 assistant 消息，用于流式填充
+  const assistantMsgId = (Date.now() + 1).toString();
+  messages.value.push({
+    id: assistantMsgId,
+    role: "assistant",
+    content: "",
+    sources: null,
+    createdAt: new Date().toISOString(),
+  });
 
-    messages.value.push({
-      id: (Date.now() + 1).toString(),
-      role: "assistant",
-      content: data.answer,
-      sources: data.sources,
-      createdAt: new Date().toISOString(),
-    });
-  } catch (err) {
-    error.value = err instanceof Error ? err.message : "问答失败";
-  } finally {
-    loading.value = false;
-    await scrollDown();
-  }
+  const assistantMsg = messages.value.find((m) => m.id === assistantMsgId)!;
+
+  streamChat(
+    props.kbId,
+    q,
+    convId.value || undefined,
+    (token) => {
+      assistantMsg.content += token;
+      scrollDown();
+    },
+    (result) => {
+      convId.value = result.conversationId;
+      assistantMsg.sources = result.sources as ChunkSource[];
+      if (result.fallback) {
+        assistantMsg.content = result.answer || "";
+      }
+      loading.value = false;
+    },
+    (err) => {
+      error.value = err.message || "问答失败";
+      loading.value = false;
+    },
+  );
 }
 
 async function scrollDown() {
@@ -92,7 +104,6 @@ async function scrollDown() {
         :created-at="msg.createdAt"
       />
 
-      <div v-if="loading" class="typing">AI 正在思考...</div>
       <div v-if="error" class="error-msg">{{ error }}</div>
     </div>
 

@@ -1,23 +1,33 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import type { UserInfo } from "@/types.js";
-import { api } from "@/lib/api.js";
+import { api, setAccessToken } from "@/lib/api.js";
+
+function loadUser(): UserInfo | null {
+  try {
+    const raw = localStorage.getItem("user");
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
 
 export const useAuthStore = defineStore("auth", () => {
-  const user = ref<UserInfo | null>(null);
-  const token = ref<string | null>(localStorage.getItem("token"));
+  const user = ref<UserInfo | null>(loadUser());
+  const isLoggedIn = ref(!!localStorage.getItem("refreshToken"));
 
-  const isLoggedIn = computed(() => !!token.value);
   const isAdmin = computed(() => user.value?.role === "admin");
 
   async function login(username: string, password: string) {
-    const res = await api.post<{ token: string; user: UserInfo }>("/auth/login", {
+    const res = await api.post<{ accessToken: string; refreshToken: string; token: string; user: UserInfo }>("/auth/login", {
       username,
       password,
     });
-    token.value = res.data.token;
+    setAccessToken(res.data.accessToken);
+    localStorage.setItem("refreshToken", res.data.refreshToken);
+    localStorage.setItem("user", JSON.stringify(res.data.user));
     user.value = res.data.user;
-    localStorage.setItem("token", res.data.token);
+    isLoggedIn.value = true;
   }
 
   async function register(username: string, password: string) {
@@ -25,10 +35,12 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   function logout() {
-    token.value = null;
     user.value = null;
+    isLoggedIn.value = false;
+    localStorage.removeItem("refreshToken");
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
   }
 
-  return { user, token, isLoggedIn, isAdmin, login, register, logout };
+  return { user, isLoggedIn, isAdmin, login, register, logout };
 });

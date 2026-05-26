@@ -1,5 +1,6 @@
 import { searchVectors, type SearchResult } from "../lib/vectordb.js";
 import { embedSingle } from "../pipeline/embedder.js";
+import { rerank } from "../pipeline/reranker.js";
 import { redis } from "../lib/redis.js";
 import { config } from "../config.js";
 import type { ChunkSource } from "../types.js";
@@ -128,12 +129,13 @@ export async function retrieve(kbId: string, question: string): Promise<ChunkSou
 
   // RRF 融合
   const fused = rrfFuse(vectorResults, bm25Results);
+  const candidateCount = config.RERANKER_ENABLED ? config.RERANKER_TOP_K : config.FINAL_TOP_K;
   const sorted = Array.from(fused.entries())
     .sort(([, a], [, b]) => b - a)
-    .slice(0, config.FINAL_TOP_K);
+    .slice(0, candidateCount);
 
   // 组装结果
-  const sources: ChunkSource[] = [];
+  let sources: ChunkSource[] = [];
   for (const [chunkId, score] of sorted) {
     const match = vectorResults.find(
       (r) => String(r.id || r.payload.chunkId) === chunkId,
@@ -147,6 +149,11 @@ export async function retrieve(kbId: string, question: string): Promise<ChunkSou
         docFilename: String(match.payload.docFilename || ""),
       });
     }
+  }
+
+  // Reranker 精排
+  if (config.RERANKER_ENABLED && sources.length > config.FINAL_TOP_K) {
+    sources = await rerank(question, sources);
   }
 
   return sources;

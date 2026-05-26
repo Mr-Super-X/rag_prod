@@ -1,6 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import { authenticate } from "../middleware/auth.js";
-import { ask } from "../services/chat.service.js";
+import { ask, streamAsk } from "../services/chat.service.js";
+import { streamGenerate } from "../pipeline/generator.js";
+import { addMessage } from "../services/context.service.js";
 import {
   listConversations,
   getConversation,
@@ -21,10 +23,51 @@ const chatBody = {
 export async function chatRoutes(app: FastifyInstance) {
   app.addHook("onRequest", authenticate);
 
-  // 问答
-  app.post("/api/kb/:id/chat", { schema: { body: chatBody } }, async (request) => {
+  // 问答（非流式，V1 兼容）
+  app.post("/api/kb/:id/chat", { schema: { body: chatBody } }, async (request, reply) => {
     const { id: kbId } = request.params as { id: string };
     const body = request.body as ChatRequest;
+
+    const acceptSSE = request.headers.accept?.includes("text/event-stream");
+
+    if (acceptSSE) {
+      // 流式 SSE 响应
+      reply.raw.writeHead(200, {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+        "X-Accel-Buffering": "no",
+      });
+
+      try {
+        const result = await streamAsk(kbId, body.question, body.conversationId, request.user!.id);
+
+        let fullAnswer = "";
+        for await (const token of streamGenerate(
+          result.sources.map((s, i) => `[${i + 1}] ${s.docFilename}\n${s.content}`).join("\n\n"),
+          result.rewrittenQuestion,
+          result.historyForLLM as { role: "user" | "system" | "assistant"; content: string }[],
+        )) {
+          fullAnswer += token;
+          reply.raw.write(`data: ${JSON.stringify({ token })}\n\n`);
+        }
+
+        await addMessage(result.convId, "assistant", fullAnswer, result.sources);
+        reply.raw.write(`data: ${JSON.stringify({ done: true, conversationId: result.convId, sources: result.sources })}\n\n`);
+      } catch (err: unknown) {
+        const e = err as { type?: string; message?: string; conversationId?: string };
+        if (e.type === "fallback") {
+          reply.raw.write(`data: ${JSON.stringify({ done: true, fallback: true, answer: e.message, conversationId: e.conversationId, sources: [] })}\n\n`);
+        } else {
+          reply.raw.write(`data: ${JSON.stringify({ error: e.message || "Stream failed" })}\n\n`);
+        }
+      }
+
+      reply.raw.end();
+      return;
+    }
+
+    // 非流式（V1 兼容）
     const result = await ask(kbId, body, request.user!.id);
     return { success: true, data: result };
   });

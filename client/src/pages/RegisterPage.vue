@@ -21,8 +21,12 @@ async function handleRegister() {
     error.value = "两次密码不一致";
     return;
   }
-  if (password.value.length < 6) {
-    error.value = "密码至少 6 位";
+  if (password.value.length < 8) {
+    error.value = "密码至少 8 位";
+    return;
+  }
+  if (!/[a-zA-Z]/.test(password.value) || !/[0-9]/.test(password.value)) {
+    error.value = "密码需包含字母和数字";
     return;
   }
   loading.value = true;

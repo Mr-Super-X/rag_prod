@@ -47,6 +47,58 @@ export async function generate(
   return data.message.content;
 }
 
+export async function* streamGenerate(
+  context: string,
+  question: string,
+  history: OllamaChatMessage[] = [],
+): AsyncGenerator<string> {
+  const messages: OllamaChatMessage[] = [
+    { role: "system", content: SYSTEM_PROMPT },
+    ...history,
+    { role: "user", content: `参考文档：\n${context}\n\n问题：${question}` },
+  ];
+
+  const res = await fetch(`${config.OLLAMA_URL}/api/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: config.LLM_MODEL,
+      messages,
+      stream: true,
+      options: { temperature: 0.3, num_predict: 1024 },
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Ollama stream failed: ${res.status}`);
+  }
+
+  const reader = res.body!.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
+
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      try {
+        const json = JSON.parse(line);
+        if (json.message?.content) {
+          yield json.message.content;
+        }
+      } catch {
+        // skip unparseable lines
+      }
+    }
+  }
+}
+
 export async function rewriteQuestion(
   question: string,
   historyMessages: { role: string; content: string }[],

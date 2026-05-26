@@ -29,10 +29,10 @@ const router = createRouter({
 });
 
 router.beforeEach((to, _from, next) => {
-  const token = localStorage.getItem("token");
-  if (to.meta.requiresAuth && !token) {
+  const hasAuth = localStorage.getItem("refreshToken");
+  if (to.meta.requiresAuth && !hasAuth) {
     next("/login");
-  } else if ((to.path === "/login" || to.path === "/register") && token) {
+  } else if ((to.path === "/login" || to.path === "/register") && hasAuth) {
     next("/");
   } else {
     next();
