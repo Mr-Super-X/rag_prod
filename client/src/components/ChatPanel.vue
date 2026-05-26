@@ -1,0 +1,137 @@
+<script setup lang="ts">
+import { ref, nextTick, watch } from "vue";
+import { api } from "@/lib/api.js";
+import MessageBubble from "./MessageBubble.vue";
+import type { Message, ChunkSource, ApiResponse } from "@/types.js";
+
+const props = defineProps<{ kbId: string }>();
+
+interface ChatResult {
+  answer: string;
+  sources: ChunkSource[];
+  conversationId: string;
+}
+
+const messages = ref<Message[]>([]);
+const question = ref("");
+const loading = ref(false);
+const error = ref("");
+const convId = ref<string | null>(null);
+const messagesEl = ref<HTMLElement | null>(null);
+
+watch(
+  () => props.kbId,
+  () => {
+    messages.value = [];
+    convId.value = null;
+    error.value = "";
+  },
+);
+
+async function send() {
+  const q = question.value.trim();
+  if (!q || loading.value) return;
+
+  question.value = "";
+  loading.value = true;
+  error.value = "";
+
+  messages.value.push({
+    id: Date.now().toString(),
+    role: "user",
+    content: q,
+    sources: null,
+    createdAt: new Date().toISOString(),
+  });
+  await scrollDown();
+
+  try {
+    const res = await api.post<ChatResult>(`/kb/${props.kbId}/chat`, {
+      question: q,
+      conversationId: convId.value,
+    });
+    const data = res.data;
+    convId.value = data.conversationId;
+
+    messages.value.push({
+      id: (Date.now() + 1).toString(),
+      role: "assistant",
+      content: data.answer,
+      sources: data.sources,
+      createdAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : "问答失败";
+  } finally {
+    loading.value = false;
+    await scrollDown();
+  }
+}
+
+async function scrollDown() {
+  await nextTick();
+  if (messagesEl.value) {
+    messagesEl.value.scrollTop = messagesEl.value.scrollHeight;
+  }
+}
+</script>
+
+<template>
+  <div class="chat-panel">
+    <div ref="messagesEl" class="messages">
+      <div v-if="messages.length === 0" class="empty-hint">
+        <p>在下方输入问题，基于知识库文档获取答案</p>
+      </div>
+
+      <MessageBubble
+        v-for="msg in messages"
+        :key="msg.id"
+        :role="msg.role"
+        :content="msg.content"
+        :sources="msg.sources"
+        :created-at="msg.createdAt"
+      />
+
+      <div v-if="loading" class="typing">AI 正在思考...</div>
+      <div v-if="error" class="error-msg">{{ error }}</div>
+    </div>
+
+    <div class="input-row">
+      <input
+        v-model="question"
+        type="text"
+        placeholder="输入问题，按回车发送"
+        @keydown.enter="send"
+        :disabled="loading"
+      />
+      <button class="btn-send" :disabled="loading || !question.trim()" @click="send">
+        发送
+      </button>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.chat-panel {
+  display: flex; flex-direction: column; height: calc(100vh - 200px);
+  border: 1px solid var(--color-border); border-radius: 12px;
+  background: var(--color-surface); overflow: hidden;
+}
+.messages {
+  flex: 1; overflow-y: auto; padding: 20px;
+}
+.empty-hint { text-align: center; padding: 60px 20px; color: var(--color-text-secondary); font-size: 14px; }
+.typing { font-size: 13px; color: var(--color-text-secondary); padding: 8px 0; }
+.error-msg { background: #fef2f2; color: var(--color-danger); padding: 8px 12px; border-radius: var(--radius); font-size: 13px; margin: 8px 0; }
+.input-row {
+  display: flex; gap: 8px; padding: 12px 16px;
+  border-top: 1px solid var(--color-border); background: var(--color-bg);
+}
+.input-row input { flex: 1; }
+.btn-send {
+  background: var(--color-primary); color: #fff;
+  padding: 8px 20px; font-size: 14px; white-space: nowrap;
+}
+.btn-send:disabled { opacity: 0.5; }
+.btn-send:hover:not(:disabled) { background: var(--color-primary-hover); }
+</style>
