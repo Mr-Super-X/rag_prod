@@ -5,9 +5,6 @@ node_modules/
 dist/
 client/dist/
 
-# 环境变量（含密钥，不可提交）
-.env
-
 # 运行时数据
 data/
 logs/
@@ -15,9 +12,6 @@ backups/
 
 # Docker 离线导出（大文件，不提交）
 exports/
-
-# OMC 状态文件
-.omc/
 
 # 系统文件
 .DS_Store

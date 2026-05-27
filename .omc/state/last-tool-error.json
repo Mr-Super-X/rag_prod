@@ -1,0 +1,7 @@
+{
+  "tool_name": "Read",
+  "tool_input_preview": "{\"file_path\":\"C:\\\\Users\\\\17688\\\\.claude\\\\projects\\\\D--personal-AI-rag-prod\\\\memory\\\\project_version_history.md\"}",
+  "error": "File does not exist. Note: your current working directory is D:\\personal\\AI\\rag_prod.",
+  "timestamp": "2026-05-27T05:02:13.405Z",
+  "retry_count": 4
+}

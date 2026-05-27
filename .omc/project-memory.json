@@ -1,0 +1,547 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1779794940696,
+  "projectRoot": "D:\\personal\\AI\\rag_prod",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "fastify",
+        "version": "5.0.0",
+        "category": "backend"
+      },
+      {
+        "name": "vitest",
+        "version": "3.0.0",
+        "category": "testing"
+      }
+    ],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "lintCommand": null,
+    "devCommand": "npm run dev",
+    "scripts": {
+      "dev": "tsx watch src/server.ts",
+      "build": "tsc",
+      "start": "node dist/server.js",
+      "db:generate": "drizzle-kit generate",
+      "db:migrate": "drizzle-kit migrate",
+      "db:studio": "drizzle-kit studio",
+      "test": "vitest run",
+      "test:watch": "vitest"
+    }
+  },
+  "conventions": {
+    "namingStyle": "camelCase",
+    "importStyle": "ES modules",
+    "testPattern": "*.test.ts",
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "docs",
+      "scripts",
+      "src",
+      "test"
+    ],
+    "gitBranches": {
+      "defaultBranch": "master",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [
+    {
+      "timestamp": 1779857376395,
+      "source": "manual",
+      "content": "V1-V9 开发全流程最佳实践模式：\n\n1. **开发前必走深度访谈**：用户偏好 Deep Interview → Ralplan → Autopilot 三阶段流程，即使需求看起来清晰。V1 的 6 轮访谈将模糊度从 100% 降到 19%，避免了大量返工。\n\n2. **中文技术栈模式**：国内 Docker 镜像源不稳定（网易/百度已停止服务），需配 VPN 代理。用户使用 npm 官方源 + HTTP 代理。Docker Desktop 代理需同时配两处（Resources → Proxies 和 Docker Engine JSON）。\n\n3. **硬件约束决策**：用户是 Intel 核显 + NPU，无 NVIDIA GPU。所有推理走 CPU（Ollama），文档处理 1-2 分钟可接受。Reranker 从 25 次逐条 LLM 调用改为 1 次列表式调用，延迟从 25s 降到 3s。\n\n4. **文档驱动开发**：每次交付功能后必须同步更新文档。项目现有 7 份核心文档：README、架构设计、功能清单、迭代开发全记录、部署指南、用户指南。修改功能 → 更新功能清单，修改方案 → 更新架构文档。\n\n5. **23 个踩坑记录的价值**：每次踩坑都记录在迭代开发全记录中，从 Docker 镜像源失效到 Fastify hook 需要 async。这些记录对后续开发和 AI 扩展有重要参考价值。"
+    },
+    {
+      "timestamp": 1779857388505,
+      "source": "manual",
+      "content": "用户反馈风格：\n\n1. **用户说\"你帮我定\"**：当用户不确定技术细节时，给出务实的小范围建议，等确认后再执行。V1 的 MVP 范围就是用户在\"你帮我定\"后确认的。\n\n2. **用户说\"你一定要我来操作吗\"**：此后所有 API 测试、数据库操作、命令行执行都由 AI 直接完成，不再要求用户手动复制粘贴。用户只需在浏览器前端验证 UI 效果。\n\n3. **用户说\"检查文档完善程度\"**：用户非常重视文档质量，会多次要求审查文档的完整性、准确性、小白友好度。文档中的错误（如把 Embedding 返回字段写错）必须立刻修正。\n\n4. **用户偏好立即实现**：V2-V9 每次访谈收敛后，用户都选择\"Ralplan → Autopilot\"直接进入实现，跳过中间讨论。说明用户信任三阶段流程的产出质量。\n\n5. **用户关注细节**：从\"对话历史在右侧不对\"到\"2秒后没刷新\"，用户逐一验证功能并反馈。这说明交付后必须主动测试而非假设正常。"
+    },
+    {
+      "timestamp": 1779857395747,
+      "source": "manual",
+      "content": "关键技术架构决策：\n\n1. **向量库选 LanceDB**：因为 Qdrant Docker 镜像在国内无法拉取，切换为嵌入式 LanceDB。这是\"避开 Docker 依赖\"模式的开端。\n\n2. **Ollama 统一管理 LLM + Embedding**：放弃了 Transformers.js 方案（BGE ONNX 模型不可用风险），改用 Ollama BGE-m3。Embedding 和 LLM 都走 Ollama API，Node.js 后端只做编排，不内嵌推理。\n\n3. **LanceDB 的坑**：不能创建空表（需要显式 Schema），向量列需要数据驱动的自动识别（`embeddings` 复数！不是 `embedding` 单数），`createTable(name, data)` 直接传数据即可。\n\n4. **Fastify Hook 陷阱**：`onRequest` 和 `preHandler` 的同步函数不会自动继续执行。所有 hook 函数必须是 `async` 或显式调用 `done()`，否则请求挂死。\n\n5. **RRF 分数 ≠ 相似度**：RRF 融合分数是排名分数（0.01-0.05），不能直接和余弦相似度阈值（0.5）比较。兜底判断应改为 `sources.length === 0`。\n\n6. **Windows curl 中文 JSON 的 Content-Length 计算错误**：中文 JSON 用文件 `-d @file` 方式发送可避免编码问题。Bash 会话间 `/tmp` 文件不持久。"
+    },
+    {
+      "timestamp": 1779857402351,
+      "source": "manual",
+      "content": "V1-V9 各版本交付摘要：\n\n- V1（2天）：核心 RAG 平台 — Fastify + LanceDB + Ollama + Vue3，29 后端文件 + 17 前端文件\n- V2（当天）：SSE 流式输出 + JWT access/refresh 双 token + 密码强度 + Reranker（逐条打分→后改为列表式）\n- V3（当天）：Pino 结构化日志 + 数据库备份脚本（PG dump+LanceDB+uploads 打包）+ 增量索引（SHA256 hash 比对）\n- V4（当天）：@fastify/rate-limit 60次/分钟 + kb_members 多租户中间件 + 思考过程动画 + 文档轮询\n- V5（当天）：DeepSeek API 一键切换（LLM_PROVIDER=deepseek）+ 深色模式 + 移动端 @media + Playwright E2E\n- V6（当天）：成员管理 UI + Agent 能力（内置 get_current_time/simple_calculator 函数）\n- V7（当天）：KB 列表分组 + 思考过程分阶段 + Excel/PPT 解析\n- V8（当天）：管理员控制台 + 文档进度轮询加速\n- V9（今天）：对话导出 + KB 使用统计 + 对话历史左侧布局 + 新对话按钮 + 对话点击加载\n\n总计 9 个版本、27 个踩坑记录、7 份文档。\n\n**关键效率模式**：V2-V9 每个版本从访谈到实现平均 30-60 分钟。因为走 Deep Interview（1-2轮）→ Ralplan（1-2轮审查）→ 直接实现，跳过了漫长的方案讨论阶段。"
+    }
+  ],
+  "directoryMap": {
+    "client": {
+      "path": "client",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1779794940624,
+      "keyFiles": [
+        "env.d.ts",
+        "index.html",
+        "package-lock.json",
+        "package.json",
+        "tsconfig.json"
+      ]
+    },
+    "data": {
+      "path": "data",
+      "purpose": "Data files",
+      "fileCount": 2,
+      "lastAccessed": 1779794940632,
+      "keyFiles": [
+        "test-doc.md",
+        "test-upload.md"
+      ]
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 6,
+      "lastAccessed": 1779794940655,
+      "keyFiles": [
+        "V1开发实录-从方案到落地.md",
+        "企业级RAG知识库架构设计与落地.md",
+        "功能清单.md",
+        "小白部署指南-从本地到上线.md",
+        "架构设计与实现细节.md"
+      ]
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 1,
+      "lastAccessed": 1779794940656,
+      "keyFiles": [
+        "seed.ts"
+      ]
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 4,
+      "lastAccessed": 1779794940657,
+      "keyFiles": [
+        "app.ts",
+        "config.ts",
+        "server.ts",
+        "types.ts"
+      ]
+    },
+    "test": {
+      "path": "test",
+      "purpose": "Test files",
+      "fileCount": 4,
+      "lastAccessed": 1779794940657,
+      "keyFiles": [
+        "auth.test.ts",
+        "chat.test.ts",
+        "kb.test.ts",
+        "setup.ts"
+      ]
+    },
+    "client\\node_modules": {
+      "path": "client\\node_modules",
+      "purpose": "Dependencies",
+      "fileCount": 1,
+      "lastAccessed": 1779794940658,
+      "keyFiles": []
+    },
+    "client\\public": {
+      "path": "client\\public",
+      "purpose": "Public files",
+      "fileCount": 0,
+      "lastAccessed": 1779794940658,
+      "keyFiles": []
+    },
+    "client\\src": {
+      "path": "client\\src",
+      "purpose": "Source code",
+      "fileCount": 3,
+      "lastAccessed": 1779794940659,
+      "keyFiles": [
+        "App.vue",
+        "main.ts",
+        "types.ts"
+      ]
+    },
+    "src\\lib": {
+      "path": "src\\lib",
+      "purpose": "Library code",
+      "fileCount": 3,
+      "lastAccessed": 1779794940660,
+      "keyFiles": [
+        "errors.ts",
+        "redis.ts",
+        "vectordb.ts"
+      ]
+    },
+    "src\\middleware": {
+      "path": "src\\middleware",
+      "purpose": "Middleware",
+      "fileCount": 1,
+      "lastAccessed": 1779794940660,
+      "keyFiles": [
+        "auth.ts"
+      ]
+    },
+    "src\\routes": {
+      "path": "src\\routes",
+      "purpose": "Route handlers",
+      "fileCount": 4,
+      "lastAccessed": 1779794940661,
+      "keyFiles": [
+        "auth.ts",
+        "chat.ts",
+        "doc.ts"
+      ]
+    },
+    "src\\services": {
+      "path": "src\\services",
+      "purpose": "Business logic services",
+      "fileCount": 6,
+      "lastAccessed": 1779794940661,
+      "keyFiles": [
+        "auth.service.ts",
+        "chat.service.ts",
+        "context.service.ts"
+      ]
+    },
+    "src\\types": {
+      "path": "src\\types",
+      "purpose": "Type definitions",
+      "fileCount": 1,
+      "lastAccessed": 1779794940661,
+      "keyFiles": [
+        "pdf-parse.d.ts"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "README.md",
+      "accessCount": 27,
+      "lastAccessed": 1779855231769,
+      "type": "file"
+    },
+    {
+      "path": "src\\routes\\chat.ts",
+      "accessCount": 24,
+      "lastAccessed": 1779864521534,
+      "type": "file"
+    },
+    {
+      "path": "src\\routes\\kb.ts",
+      "accessCount": 19,
+      "lastAccessed": 1779864450908,
+      "type": "file"
+    },
+    {
+      "path": "src\\services\\kb.service.ts",
+      "accessCount": 17,
+      "lastAccessed": 1779852022896,
+      "type": "file"
+    },
+    {
+      "path": "src\\middleware\\auth.ts",
+      "accessCount": 14,
+      "lastAccessed": 1779866093819,
+      "type": "file"
+    },
+    {
+      "path": "CLAUDE.md",
+      "accessCount": 11,
+      "lastAccessed": 1779858770728,
+      "type": "file"
+    },
+    {
+      "path": "src\\routes\\doc.ts",
+      "accessCount": 11,
+      "lastAccessed": 1779864458956,
+      "type": "file"
+    },
+    {
+      "path": "src\\services\\chat.service.ts",
+      "accessCount": 10,
+      "lastAccessed": 1779860336303,
+      "type": "file"
+    },
+    {
+      "path": "docs\\AGENTS.md",
+      "accessCount": 8,
+      "lastAccessed": 1779854173206,
+      "type": "file"
+    },
+    {
+      "path": "src\\db\\schema.ts",
+      "accessCount": 8,
+      "lastAccessed": 1779864146492,
+      "type": "file"
+    },
+    {
+      "path": "src\\app.ts",
+      "accessCount": 7,
+      "lastAccessed": 1779864472256,
+      "type": "file"
+    },
+    {
+      "path": "src\\routes\\auth.ts",
+      "accessCount": 7,
+      "lastAccessed": 1779866079527,
+      "type": "file"
+    },
+    {
+      "path": "src\\pipeline\\parser.ts",
+      "accessCount": 6,
+      "lastAccessed": 1779852979506,
+      "type": "file"
+    },
+    {
+      "path": "src\\pipeline\\generator.ts",
+      "accessCount": 5,
+      "lastAccessed": 1779860334759,
+      "type": "file"
+    },
+    {
+      "path": "src\\services\\doc.service.ts",
+      "accessCount": 5,
+      "lastAccessed": 1779860437570,
+      "type": "file"
+    },
+    {
+      "path": "src\\config.ts",
+      "accessCount": 5,
+      "lastAccessed": 1779863996734,
+      "type": "file"
+    },
+    {
+      "path": "client\\src\\lib\\api.ts",
+      "accessCount": 3,
+      "lastAccessed": 1779860579847,
+      "type": "file"
+    },
+    {
+      "path": "client\\src\\router\\index.ts",
+      "accessCount": 3,
+      "lastAccessed": 1779864770226,
+      "type": "file"
+    },
+    {
+      "path": "src\\lib\\errors.ts",
+      "accessCount": 2,
+      "lastAccessed": 1779863996593,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 1,
+      "lastAccessed": 1779795258407,
+      "type": "file"
+    },
+    {
+      "path": "docker-compose.yml",
+      "accessCount": 1,
+      "lastAccessed": 1779795260634,
+      "type": "file"
+    },
+    {
+      "path": "tsconfig.json",
+      "accessCount": 1,
+      "lastAccessed": 1779795261344,
+      "type": "file"
+    },
+    {
+      "path": "vitest.config.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779795261674,
+      "type": "file"
+    },
+    {
+      "path": "drizzle.config.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779795262352,
+      "type": "file"
+    },
+    {
+      "path": "src\\server.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779795269913,
+      "type": "file"
+    },
+    {
+      "path": "src\\db\\index.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779795272722,
+      "type": "file"
+    },
+    {
+      "path": "src\\types.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779795273285,
+      "type": "file"
+    },
+    {
+      "path": "src\\lib\\redis.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779795279369,
+      "type": "file"
+    },
+    {
+      "path": "src\\services\\retrieval.service.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779795280444,
+      "type": "file"
+    },
+    {
+      "path": "src\\pipeline\\embedder.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779795281946,
+      "type": "file"
+    },
+    {
+      "path": "src\\lib\\vectordb.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779795287046,
+      "type": "file"
+    },
+    {
+      "path": "src\\services\\context.service.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779795290867,
+      "type": "file"
+    },
+    {
+      "path": "src\\services\\auth.service.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779795291521,
+      "type": "file"
+    },
+    {
+      "path": "src\\pipeline\\splitter.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779795297719,
+      "type": "file"
+    },
+    {
+      "path": "src\\pipeline\\reranker.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779795300061,
+      "type": "file"
+    },
+    {
+      "path": "client\\src\\stores\\auth.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779795442843,
+      "type": "file"
+    },
+    {
+      "path": "ecosystem.config.cjs",
+      "accessCount": 1,
+      "lastAccessed": 1779795797684,
+      "type": "file"
+    },
+    {
+      "path": "client\\src\\composables\\useAsync.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779795935619,
+      "type": "file"
+    },
+    {
+      "path": "scripts\\seed.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779795936358,
+      "type": "file"
+    },
+    {
+      "path": "test\\setup.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779795937069,
+      "type": "file"
+    },
+    {
+      "path": "docker-compose.mac.yml",
+      "accessCount": 1,
+      "lastAccessed": 1779795938080,
+      "type": "file"
+    },
+    {
+      "path": "AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1779795961927,
+      "type": "file"
+    },
+    {
+      "path": "src\\AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1779795977134,
+      "type": "file"
+    },
+    {
+      "path": "client\\AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1779795983747,
+      "type": "file"
+    },
+    {
+      "path": "test\\AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1779795989945,
+      "type": "file"
+    },
+    {
+      "path": "scripts\\AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1779795996143,
+      "type": "file"
+    },
+    {
+      "path": "client\\src\\AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1779796008978,
+      "type": "file"
+    },
+    {
+      "path": "client\\src\\components\\AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1779796015110,
+      "type": "file"
+    },
+    {
+      "path": "client\\src\\composables\\AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1779796018966,
+      "type": "file"
+    },
+    {
+      "path": "client\\src\\lib\\AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1779796025036,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

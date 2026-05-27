@@ -1,0 +1,197 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1779857825365,
+  "projectRoot": "D:\\personal\\AI\\rag_prod\\client",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "vue",
+        "version": "3.5.0",
+        "category": "frontend"
+      },
+      {
+        "name": "vite",
+        "version": "6.0.0",
+        "category": "build"
+      }
+    ],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": "npm run dev",
+    "scripts": {
+      "dev": "vite",
+      "build": "vue-tsc -b && vite build",
+      "preview": "vite preview"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": "type-based"
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "public",
+      "src"
+    ],
+    "gitBranches": {
+      "defaultBranch": "master",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "public": {
+      "path": "public",
+      "purpose": "Public files",
+      "fileCount": 0,
+      "lastAccessed": 1779857825332,
+      "keyFiles": []
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 4,
+      "lastAccessed": 1779857825332,
+      "keyFiles": [
+        "AGENTS.md",
+        "App.vue",
+        "main.ts",
+        "types.ts"
+      ]
+    },
+    "src\\components": {
+      "path": "src\\components",
+      "purpose": "UI components",
+      "fileCount": 8,
+      "lastAccessed": 1779857825341,
+      "keyFiles": [
+        "AGENTS.md",
+        "AppLayout.vue",
+        "ChatPanel.vue"
+      ]
+    },
+    "src\\lib": {
+      "path": "src\\lib",
+      "purpose": "Library code",
+      "fileCount": 2,
+      "lastAccessed": 1779857825342,
+      "keyFiles": [
+        "AGENTS.md",
+        "api.ts"
+      ]
+    },
+    "src\\pages": {
+      "path": "src\\pages",
+      "purpose": "Page components",
+      "fileCount": 6,
+      "lastAccessed": 1779857825342,
+      "keyFiles": [
+        "AdminPage.vue",
+        "AGENTS.md",
+        "KBDetailPage.vue"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "src\\components\\MessageBubble.vue",
+      "accessCount": 8,
+      "lastAccessed": 1779864977690,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\DocList.vue",
+      "accessCount": 6,
+      "lastAccessed": 1779862847995,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\DocPreviewModal.vue",
+      "accessCount": 5,
+      "lastAccessed": 1779860793502,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\ConversationList.vue",
+      "accessCount": 5,
+      "lastAccessed": 1779860803150,
+      "type": "file"
+    },
+    {
+      "path": "src\\pages\\SettingsPage.vue",
+      "accessCount": 3,
+      "lastAccessed": 1779864981499,
+      "type": "file"
+    },
+    {
+      "path": "src",
+      "accessCount": 2,
+      "lastAccessed": 1779859330929,
+      "type": "directory"
+    },
+    {
+      "path": "src\\types.ts",
+      "accessCount": 2,
+      "lastAccessed": 1779859351951,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 1,
+      "lastAccessed": 1779857925981,
+      "type": "file"
+    },
+    {
+      "path": "src\\lib\\api.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779859351213,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\ChatPanel.vue",
+      "accessCount": 1,
+      "lastAccessed": 1779860683368,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 1,
+      "lastAccessed": 1779860685476,
+      "type": "directory"
+    },
+    {
+      "path": "src\\pages\\AdminPage.vue",
+      "accessCount": 1,
+      "lastAccessed": 1779864977532,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

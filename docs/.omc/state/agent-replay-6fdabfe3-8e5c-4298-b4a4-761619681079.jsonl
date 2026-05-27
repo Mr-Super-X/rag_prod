@@ -1,0 +1,7 @@
+{"t":0,"agent":"system","event":"keyword_detected","keyword":"deep-interview"}
+{"t":0,"agent":"system","event":"skill_invoked","skill_name":"oh-my-claudecode:ralplan"}
+{"t":0,"agent":"a7a6780","agent_type":"architect","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"a7a6780","agent_type":"architect","event":"agent_stop","success":true,"duration_ms":74798}
+{"t":0,"agent":"a9741de","agent_type":"general-purpose","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"a9741de","agent_type":"general-purpose","event":"agent_stop","success":true,"duration_ms":13767}
+{"t":0,"agent":"system","event":"skill_invoked","skill_name":"oh-my-claudecode:autopilot"}

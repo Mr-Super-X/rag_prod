@@ -1,0 +1,26 @@
+{
+  "agents": [
+    {
+      "agent_id": "a7a6780772ac9e7b6",
+      "agent_type": "architect",
+      "started_at": "2026-05-27T06:39:40.601Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-05-27T06:40:55.399Z",
+      "duration_ms": 74798
+    },
+    {
+      "agent_id": "a9741ded0785d779c",
+      "agent_type": "general-purpose",
+      "started_at": "2026-05-27T06:41:11.695Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-05-27T06:41:25.462Z",
+      "duration_ms": 13767
+    }
+  ],
+  "total_spawned": 2,
+  "total_completed": 2,
+  "total_failed": 0,
+  "last_updated": "2026-05-27T06:41:25.570Z"
+}
