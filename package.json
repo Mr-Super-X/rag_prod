@@ -13,7 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "backup": "tsx scripts/backup.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "docker:restart": "docker-compose down && docker-compose up -d"
   },
   "dependencies": {
     "@fastify/cors": "^10.0.0",
@@ -31,6 +32,7 @@
     "mammoth": "^1.12.0",
     "pdf-parse": "^1.1.1",
     "postgres": "^3.4.0",
+    "xlsx": "^0.18.5",
     "zod": "^3.25.0"
   },
   "devDependencies": {

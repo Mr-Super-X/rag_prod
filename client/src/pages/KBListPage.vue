@@ -1,14 +1,20 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { api } from "@/lib/api.js";
+import { useAuthStore } from "@/stores/auth.js";
 import { useAsync } from "@/composables/useAsync.js";
 import AppLayout from "@/components/AppLayout.vue";
 import type { KnowledgeBase } from "@/types.js";
 
 const router = useRouter();
+const auth = useAuthStore();
 const kbs = useAsync<KnowledgeBase[]>();
 const create = useAsync<KnowledgeBase>();
+
+const myKBs = computed(() => (kbs.data.value || []).filter((kb) => kb.createdBy === auth.user?.id));
+const sharedKBs = computed(() => (kbs.data.value || []).filter((kb) => kb.createdBy !== auth.user?.id));
+const hasBoth = computed(() => myKBs.value.length > 0 && sharedKBs.value.length > 0);
 
 const showCreate = ref(false);
 const newName = ref("");
@@ -61,16 +67,30 @@ function enterKB(id: string) {
       </div>
 
       <!-- List -->
-      <div v-else class="kb-grid">
-        <div
-          v-for="kb in kbs.data.value"
-          :key="kb.id"
-          class="kb-card"
-          @click="enterKB(kb.id)"
-        >
-          <h3>{{ kb.name }}</h3>
-          <p class="desc" v-if="kb.description">{{ kb.description }}</p>
-          <p class="meta">{{ new Date(kb.createdAt).toLocaleDateString("zh-CN") }}</p>
+      <div v-else>
+        <template v-if="hasBoth">
+          <h4 v-if="myKBs.length" class="group-title">我创建的</h4>
+          <div class="kb-grid">
+            <div v-for="kb in myKBs" :key="kb.id" class="kb-card" @click="enterKB(kb.id)">
+              <h3>{{ kb.name }}</h3>
+              <p class="desc" v-if="kb.description">{{ kb.description }}</p>
+              <p class="meta">{{ new Date(kb.createdAt).toLocaleDateString("zh-CN") }}</p>
+            </div>
+          </div>
+          <h4 v-if="sharedKBs.length" class="group-title">共享给我的</h4>
+          <div class="kb-grid">
+            <div v-for="kb in sharedKBs" :key="kb.id" class="kb-card shared" @click="enterKB(kb.id)">
+              <h3>{{ kb.name }}</h3>
+              <p class="meta">{{ new Date(kb.createdAt).toLocaleDateString("zh-CN") }}</p>
+            </div>
+          </div>
+        </template>
+        <div v-else class="kb-grid">
+          <div v-for="kb in kbs.data.value" :key="kb.id" class="kb-card" @click="enterKB(kb.id)">
+            <h3>{{ kb.name }}</h3>
+            <p class="desc" v-if="kb.description">{{ kb.description }}</p>
+            <p class="meta">{{ new Date(kb.createdAt).toLocaleDateString("zh-CN") }}</p>
+          </div>
         </div>
       </div>
 
@@ -119,6 +139,8 @@ h2 { font-size: 22px; }
   cursor: pointer;
   transition: box-shadow 0.15s;
 }
+.group-title { font-size: 14px; font-weight: 600; color: var(--color-text-secondary); margin: 8px 0 4px; }
+.kb-card.shared { border-left: 3px solid var(--color-primary); }
 .kb-card:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
 .kb-card h3 { font-size: 16px; margin-bottom: 8px; }
 .desc { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 12px; }

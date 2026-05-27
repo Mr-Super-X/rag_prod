@@ -35,7 +35,9 @@ async function send() {
 
   question.value = "";
   loading.value = true;
-  thinking.value = "检索中...";
+  thinking.value = "正在检索...";
+  const phaseTimer1 = setTimeout(() => { if (loading.value) thinking.value = "正在分析..."; }, 1500);
+  const phaseTimer2 = setTimeout(() => { if (loading.value) thinking.value = "正在生成..."; }, 4000);
   error.value = "";
 
   messages.value.push({
@@ -64,7 +66,7 @@ async function send() {
     q,
     convId.value || undefined,
     (token) => {
-      if (thinking.value) { thinking.value = ""; }
+      if (thinking.value) { thinking.value = ""; clearTimeout(phaseTimer1); clearTimeout(phaseTimer2); }
       assistantMsg.content += token;
       scrollDown();
     },

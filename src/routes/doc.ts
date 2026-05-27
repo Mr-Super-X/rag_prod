@@ -18,7 +18,7 @@ export async function docRoutes(app: FastifyInstance) {
     }
 
     const ext = path.extname(file.filename);
-    const allowedExts = [".pdf", ".docx", ".md", ".txt"];
+    const allowedExts = [".pdf", ".docx", ".xlsx", ".pptx", ".md", ".txt"];
     if (!allowedExts.includes(ext.toLowerCase())) {
       return reply.status(400).send({
         success: false,

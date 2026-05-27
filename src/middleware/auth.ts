@@ -20,7 +20,7 @@ export async function authenticate(request: FastifyRequest, reply: FastifyReply)
   }
 }
 
-export function requireAdmin(request: FastifyRequest, reply: FastifyReply) {
+export async function requireAdmin(request: FastifyRequest, reply: FastifyReply) {
   if (request.user?.role !== "admin") {
     return reply.status(403).send({
       success: false,

@@ -11,6 +11,7 @@ import { authRoutes } from "./routes/auth.js";
 import { kbRoutes } from "./routes/kb.js";
 import { docRoutes } from "./routes/doc.js";
 import { chatRoutes } from "./routes/chat.js";
+import { adminRoutes } from "./routes/admin.js";
 import { redis } from "./lib/redis.js";
 import { loggerConfig } from "./lib/logger.js";
 
@@ -37,6 +38,7 @@ export async function buildApp() {
   await app.register(kbRoutes);
   await app.register(docRoutes);
   await app.register(chatRoutes);
+  await app.register(adminRoutes);
 
   // Health check
   app.get("/api/health", async () => ({ status: "ok", timestamp: new Date().toISOString() }));
