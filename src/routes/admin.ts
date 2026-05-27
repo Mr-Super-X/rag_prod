@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { authenticate, requireAdmin } from "../middleware/auth.js";
+import { logAudit } from "../lib/audit.js";
 import { db, schema } from "../db/index.js";
 import { eq, count, desc, gte } from "drizzle-orm";
 
@@ -41,6 +42,7 @@ export async function adminRoutes(app: FastifyInstance) {
   app.delete("/api/admin/users/:id", async (request, reply) => {
     const { id } = request.params as { id: string };
     await db.delete(schema.users).where(eq(schema.users.id, id));
+    logAudit(request.user!.id, "delete_user", "user", id).catch(() => {});
     return reply.status(204).send();
   });
 
@@ -48,6 +50,7 @@ export async function adminRoutes(app: FastifyInstance) {
   app.delete("/api/admin/kbs/:id", async (request, reply) => {
     const { id } = request.params as { id: string };
     await db.delete(schema.knowledgeBases).where(eq(schema.knowledgeBases.id, id));
+    logAudit(request.user!.id, "admin_delete_kb", "knowledge_base", id).catch(() => {});
     return reply.status(204).send();
   });
 

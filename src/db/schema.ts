@@ -176,7 +176,7 @@ export const auditLogs = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     userId: uuid("user_id")
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
     action: varchar("action", { length: 50 }).notNull(),
     resource: varchar("resource", { length: 50 }).notNull(),
     resourceId: varchar("resource_id", { length: 100 }),

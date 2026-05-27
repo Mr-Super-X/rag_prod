@@ -3,7 +3,7 @@ import { register, login, generateRefreshToken, refreshAccessToken } from "../se
 import { authenticate } from "../middleware/auth.js";
 import { logAudit } from "../lib/audit.js";
 import { db, schema } from "../db/index.js";
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and, isNull, count } from "drizzle-orm";
 import crypto from "node:crypto";
 
 const authBody = {
@@ -87,10 +87,19 @@ export async function authRoutes(app: FastifyInstance) {
 
   app.post("/api/auth/api-keys", { preHandler: [authenticate] }, async (request, reply) => {
     const { name } = (request.body || { name: "默认" }) as { name?: string };
+
+    // 每用户最多 10 个有效 API Key
+    const activeCount = await db
+      .select({ n: count() })
+      .from(schema.apiKeys)
+      .where(and(eq(schema.apiKeys.userId, request.user!.id), isNull(schema.apiKeys.revokedAt)));
+    if ((activeCount[0]?.n ?? 0) >= 10) {
+      return reply.status(400).send({ success: false, error: { code: "LIMIT_EXCEEDED", message: "最多 10 个有效 API Key，请先吊销不用的" } });
+    }
+
     const rawKey = `ak_${crypto.randomBytes(24).toString("hex")}`;
-    const keyHash = await new Promise<string>((resolve, reject) => {
-      crypto.scrypt(rawKey, "apikey_salt", 32, (err, d) => (err ? reject(err) : resolve(d.toString("hex"))));
-    });
+    const keyHash = crypto.createHmac("sha256", process.env.JWT_SECRET || "fallback-secret")
+      .update(rawKey).digest("hex");
     const keyPrefix = rawKey.slice(0, 8);
 
     const [created] = await db

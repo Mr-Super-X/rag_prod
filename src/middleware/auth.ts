@@ -63,9 +63,8 @@ export async function authenticateApiKey(request: FastifyRequest, reply: Fastify
   const key = authHeader.slice(7);
   if (!key.startsWith("ak_") || key.length < 20) return;
 
-  const keyHash = await new Promise<string>((resolve, reject) => {
-    crypto.scrypt(key, "apikey_salt", 32, (err, d) => (err ? reject(err) : resolve(d.toString("hex"))));
-  });
+  const keyHash = crypto.createHmac("sha256", process.env.JWT_SECRET || "fallback-secret")
+    .update(key).digest("hex");
 
   const [apiKey] = await db
     .select()

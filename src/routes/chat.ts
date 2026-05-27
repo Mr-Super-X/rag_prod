@@ -132,6 +132,18 @@ export async function chatRoutes(app: FastifyInstance) {
     }
     const userId = request.user!.id;
 
+    // 验证消息属于当前用户的对话
+    const [msg] = await db
+      .select({ convUserId: schema.conversations.userId })
+      .from(schema.messages)
+      .innerJoin(schema.conversations, eq(schema.messages.conversationId, schema.conversations.id))
+      .where(eq(schema.messages.id, messageId))
+      .limit(1);
+
+    if (!msg || msg.convUserId !== userId) {
+      return reply.status(403).send({ success: false, error: { code: "FORBIDDEN", message: "Cannot feedback on this message" } });
+    }
+
     const [existing] = await db
       .select()
       .from(schema.messageFeedback)

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-企业级 RAG 知识库平台。后端 Fastify + TypeScript，前端 Vue 3 + Vite。支持多知识库管理、文档摄入（PDF/Word/MD/TXT）、混合检索（向量 + BM25 + RRF 融合）、多轮对话（上下文改写）、SSE 流式输出、来源追溯。
+企业级 RAG 知识库平台。后端 Fastify + TypeScript，前端 Vue 3 + Vite。支持多知识库管理、文档摄入（PDF/Word/MD/TXT/XLSX/PPTX）、混合检索（向量 + BM25 + RRF 融合）、多轮对话（上下文改写）、SSE 流式输出、引用来源追溯与高亮、文档在线预览、对话搜索、答案反馈（赞/踩）、操作审计日志、API Key 鉴权、管理控制台（用户/KB/使用概览/审计/反馈统计）。
 
 ## 开发环境
 
@@ -95,14 +95,14 @@ POST /api/kb/:id/chat
 ### 认证
 
 JWT access token（15 分钟内存） + refresh token（7 天 DB 存储，rotation 机制）。
-中间件：`authenticate`（验证 JWT）、`requireAdmin`（仅 admin 角色）、`requireKBAccess`（KB 成员/创建者权限）。
-`authenticate` 通过 `app.addHook("onRequest", authenticate)` 挂载到需认证的路由组。
+API Key 鉴权：用户可在设置页生成 `ak_` 前缀的 API Key（scrypt 哈希存储），通过 `Authorization: Bearer ak_xxx` 调用问答 API。
+中间件：`authenticate`（验证 JWT）、`authenticateApiKey`（验证 API Key，V11）、`requireAdmin`（仅 admin 角色）、`requireKBAccess`（KB 成员/创建者权限）。
 前端：accessToken 内存保存，refreshToken localStorage，401 自动静默刷新。
 
 ## 数据库
 
-8 张表：`users`, `knowledge_bases`, `kb_members`, `documents`, `chunks`, `conversations`, `messages`, `refresh_tokens`。
-定义在 `src/db/schema.ts`，外键级联删除（kb → docs → chunks → messages, kb → kb_members）。
+11 张表：`users`, `knowledge_bases`, `kb_members`, `documents`, `chunks`, `conversations`, `messages`, `refresh_tokens`, `message_feedback`（V11）、`audit_logs`（V11）、`api_keys`（V11）。
+定义在 `src/db/schema.ts`，外键级联删除。
 修改 schema 后：`npx drizzle-kit generate` → `npx drizzle-kit migrate`。
 
 ## 重要约定
@@ -121,3 +121,10 @@ JWT access token（15 分钟内存） + refresh token（7 天 DB 存储，rotati
 - 速率限制：全局 60 req/min，超标返回 429
 - 文档进度轮询在前端自动处理（`DocList.vue` 每 3 秒检查，全部就绪后停止）
 - 备份系统：`npm run backup` 自动备份 PG dump + LanceDB tar.gz + 上传文件，7 天自动清理
+- 引用高亮：LLM prompt 要求输出 [1][2] 标注，后端 `validateAndInjectCitations()` 验证/兜底注入，前端 `MessageBubble.vue` 解析为可点击引用编号
+- 文档预览：`GET /api/kb/:id/docs/:docId/preview` 分页返回 chunk 拼接文本，`DocPreviewModal.vue` 弹窗展示
+- 对话搜索：`ConversationList.vue` 前端 computed 标题过滤，搜索时暂停 5s 轮询
+- 消息反馈：`POST /api/messages/:id/feedback` upsert 切换赞/踩，`message_feedback` 表存储
+- 审计日志：`src/lib/audit.ts` → `logAudit()` 记录登录/创建KB/删除KB/上传文档/删除文档，fire-and-forget
+- API Key：scrypt 哈希存储，`authenticateApiKey` 中间件，chat 路由 JWT/API Key 双重鉴权，`SettingsPage.vue` 管理
+- 管理控制台：`AdminPage.vue` 6 个标签（使用概览/用户管理/KB管理/知识库管理/审计日志/反馈概览）
