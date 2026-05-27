@@ -20,12 +20,14 @@
 
 | Directory | Purpose |
 |-----------|---------|
+| `__tests__/` | 单元测试（纯函数、无外部依赖） |
 | `db/` | Drizzle ORM schema 定义和数据库连接 |
 | `lib/` | 基础设施封装：LanceDB、Redis、错误类 |
 | `middleware/` | Fastify 中间件（JWT auth） |
 | `pipeline/` | 文档处理流水线（解析→切分→嵌入→生成→重排） |
-| `routes/` | REST API 端点（auth/kb/doc/chat） |
+| `routes/` | REST API 端点（auth/kb/doc/chat/admin） |
 | `services/` | 业务逻辑层（认证、知识库、文档、检索、对话、问答） |
+| `types/` | TypeScript 类型声明（`pdf-parse.d.ts` 等） |
 
 ## For AI Agents
 

@@ -255,6 +255,12 @@
       "type": "file"
     },
     {
+      "path": "CLAUDE.md",
+      "accessCount": 26,
+      "lastAccessed": 1779873810537,
+      "type": "file"
+    },
+    {
       "path": "src\\routes\\kb.ts",
       "accessCount": 25,
       "lastAccessed": 1779872504807,
@@ -294,12 +300,6 @@
       "path": "src\\routes\\auth.ts",
       "accessCount": 18,
       "lastAccessed": 1779872504674,
-      "type": "file"
-    },
-    {
-      "path": "CLAUDE.md",
-      "accessCount": 17,
-      "lastAccessed": 1779867130288,
       "type": "file"
     },
     {
@@ -453,6 +453,18 @@
       "type": "file"
     },
     {
+      "path": "src\\AGENTS.md",
+      "accessCount": 3,
+      "lastAccessed": 1779874233373,
+      "type": "file"
+    },
+    {
+      "path": "test\\AGENTS.md",
+      "accessCount": 3,
+      "lastAccessed": 1779874248527,
+      "type": "file"
+    },
+    {
       "path": "src\\server.ts",
       "accessCount": 2,
       "lastAccessed": 1779872502039,
@@ -495,21 +507,9 @@
       "type": "file"
     },
     {
-      "path": "src\\AGENTS.md",
-      "accessCount": 1,
-      "lastAccessed": 1779795977134,
-      "type": "file"
-    },
-    {
       "path": "client\\AGENTS.md",
       "accessCount": 1,
       "lastAccessed": 1779795983747,
-      "type": "file"
-    },
-    {
-      "path": "test\\AGENTS.md",
-      "accessCount": 1,
-      "lastAccessed": 1779795989945,
       "type": "file"
     },
     {
