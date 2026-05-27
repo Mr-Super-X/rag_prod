@@ -27,8 +27,14 @@ npm run dev
 # 启动前端（http://localhost:5173，API 代理自动到 3000）
 cd client && npm install && npm run dev
 
-# 运行测试（需要 PG + Redis 在线）
+# 运行集成测试（需要 PG + Redis 在线）
 npm test
+
+# E2E 测试（需要前后端均在线）
+npm run test:e2e
+
+# 数据库备份
+npm run backup
 ```
 
 ## 技术栈
@@ -38,7 +44,7 @@ npm test
 | 后端框架 | Fastify + `@fastify/jwt`, `@fastify/cors`, `@fastify/multipart`, `@fastify/swagger` |
 | 数据库 | PostgreSQL + Drizzle ORM（`src/db/schema.ts` → `drizzle-kit generate/migrate`） |
 | 向量库 | LanceDB（嵌入式，数据在 `data/lancedb/`） |
-| LLM | Ollama — Qwen2.5-7B（生成，`src/pipeline/generator.ts`） |
+| LLM | Ollama — Qwen2.5-7B（生成，`src/pipeline/generator.ts`），可选 DeepSeek API |
 | Embedding | Ollama — BGE-m3（1024 维，`src/pipeline/embedder.ts`） |
 | 缓存/BM25 | Redis（ioredis，`src/lib/redis.ts`） |
 | 配置 | `.env` → Zod 校验 → `src/config.ts` |
@@ -89,13 +95,14 @@ POST /api/kb/:id/chat
 ### 认证
 
 JWT access token（15 分钟内存） + refresh token（7 天 DB 存储，rotation 机制）。
-中间件：`authenticate`（`src/middleware/auth.ts`）通过 `app.addHook("onRequest", authenticate)` 挂载。
+中间件：`authenticate`（验证 JWT）、`requireAdmin`（仅 admin 角色）、`requireKBAccess`（KB 成员/创建者权限）。
+`authenticate` 通过 `app.addHook("onRequest", authenticate)` 挂载到需认证的路由组。
 前端：accessToken 内存保存，refreshToken localStorage，401 自动静默刷新。
 
 ## 数据库
 
-7 张表：`users`, `knowledge_bases`, `documents`, `chunks`, `conversations`, `messages`, `refresh_tokens`。
-定义在 `src/db/schema.ts`，外键级联删除（kb → docs → chunks → messages）。
+8 张表：`users`, `knowledge_bases`, `kb_members`, `documents`, `chunks`, `conversations`, `messages`, `refresh_tokens`。
+定义在 `src/db/schema.ts`，外键级联删除（kb → docs → chunks → messages, kb → kb_members）。
 修改 schema 后：`npx drizzle-kit generate` → `npx drizzle-kit migrate`。
 
 ## 重要约定
@@ -108,3 +115,9 @@ JWT access token（15 分钟内存） + refresh token（7 天 DB 存储，rotati
 - Reranker 默认关闭（`RERANKER_ENABLED=false`），开启后对 topK=25 用 LLM 逐条打分后取 topK=10
 - 测试环境用独立数据库 `ragtest`（见 `vitest.config.ts`）
 - 生产部署用 PM2（`ecosystem.config.cjs`）
+- LLM 提供者支持切换：`LLM_PROVIDER=ollama`（本地 CPU，慢但免费）或 `LLM_PROVIDER=deepseek`（云端 API，秒级但需 `DEEPSEEK_API_KEY`），失败自动降级到本地
+- Agent 功能通过 `AGENT_ENABLED=true` 开关控制（意图检测 + 时间查询 + 计算器），检索前拦截
+- KB 多租户隔离：`kb_members` 表 + `requireKBAccess` 中间件，非成员/非创建者无法访问
+- 速率限制：全局 60 req/min，超标返回 429
+- 文档进度轮询在前端自动处理（`DocList.vue` 每 3 秒检查，全部就绪后停止）
+- 备份系统：`npm run backup` 自动备份 PG dump + LanceDB tar.gz + 上传文件，7 天自动清理
