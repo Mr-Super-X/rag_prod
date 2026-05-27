@@ -4,7 +4,7 @@ import { api } from "@/lib/api.js";
 import AppLayout from "@/components/AppLayout.vue";
 
 interface User { id: string; username: string; role: string; createdAt: string; }
-interface KB { id: string; name: string; createdBy: string; createdAt: string; }
+interface KB { id: string; name: string; createdBy: string; createdAt: string; docCount: number; convCount: number; }
 
 const users = ref<User[]>([]);
 const kbs = ref<KB[]>([]);
@@ -53,11 +53,12 @@ async function deleteKB(id: string, name: string) {
       </table>
 
       <table v-else>
-        <thead><tr><th>名称</th><th>创建者</th><th>创建时间</th><th>操作</th></tr></thead>
+        <thead><tr><th>名称</th><th>文档数</th><th>对话数</th><th>创建时间</th><th>操作</th></tr></thead>
         <tbody>
           <tr v-for="k in kbs" :key="k.id">
             <td>{{ k.name }}</td>
-            <td>{{ k.createdBy }}</td>
+            <td>{{ k.docCount }}</td>
+            <td>{{ k.convCount }}</td>
             <td>{{ new Date(k.createdAt).toLocaleDateString("zh-CN") }}</td>
             <td><button class="btn-del" @click="deleteKB(k.id, k.name)">强制删除</button></td>
           </tr>

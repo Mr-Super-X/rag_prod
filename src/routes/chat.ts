@@ -95,4 +95,27 @@ export async function chatRoutes(app: FastifyInstance) {
     await deleteConversation(id);
     return reply.status(204).send();
   });
+
+  // 导出对话为 Markdown
+  app.get("/api/conversations/:id/export", async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const conv = await getConversation(id, request.user!.id);
+    const msgs = await getMessages(id);
+    const lines = [`# ${conv.title || "对话"}\n`];
+    for (const m of msgs) {
+      const role = m.role === "user" ? "**用户**" : "**AI**";
+      lines.push(`${role} (${new Date(m.createdAt).toLocaleString("zh-CN")})\n`);
+      lines.push(`${m.content}\n`);
+      if (m.sources && (m.sources as unknown[]).length > 0) {
+        lines.push("> 引用来源：");
+        for (const s of m.sources as { docFilename: string; content: string }[]) {
+          lines.push(`> - ${s.docFilename}: ${s.content.slice(0, 100)}`);
+        }
+        lines.push("");
+      }
+    }
+    reply.header("Content-Type", "text/markdown; charset=utf-8");
+    reply.header("Content-Disposition", `attachment; filename="conversation-${id.slice(0, 8)}.md"`);
+    return lines.join("\n");
+  });
 }

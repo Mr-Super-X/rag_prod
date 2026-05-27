@@ -22,9 +22,16 @@ onMounted(() => {
 });
 
 const refreshKey = ref(0);
-
-function onUploaded() {
-  refreshKey.value++;
+const chatKey = ref(0);
+const selectedConvId = ref("");
+function onUploaded() { refreshKey.value++; }
+function onNewChat() {
+  chatKey.value++;
+}
+function onSelectConv(id: string) {
+  selectedConvId.value = id;
+  chatKey.value++;
+  setTimeout(() => { selectedConvId.value = ""; }, 100);
 }
 </script>
 
@@ -51,12 +58,12 @@ function onUploaded() {
 
       <!-- Tab Content -->
       <div v-if="tab === 'chat'" class="tab-content chat-layout">
-        <div class="chat-main">
-          <ChatPanel :kb-id="kbId" />
-        </div>
         <aside class="chat-sidebar">
-          <ConversationList :kb-id="kbId" />
+          <ConversationList :kb-id="kbId" :key="'conv-' + chatKey" @new-chat="onNewChat" @select="onSelectConv" />
         </aside>
+        <div class="chat-main">
+          <ChatPanel :kb-id="kbId" :key="chatKey" :load-conv-id="selectedConvId" />
+        </div>
       </div>
 
       <div v-else-if="tab === 'members'" class="tab-content">
@@ -91,7 +98,7 @@ h2 { font-size: 20px; }
 }
 .tabs button.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
 .tab-content { display: flex; flex-direction: column; gap: 20px; }
-.chat-layout { display: flex; gap: 20px; }
+.chat-layout { display: flex; flex-direction: row; gap: 20px; }
 .chat-main { flex: 1; min-width: 0; }
 .chat-sidebar { width: 240px; flex-shrink: 0; max-height: calc(100vh - 200px); overflow-y: auto; }
 </style>

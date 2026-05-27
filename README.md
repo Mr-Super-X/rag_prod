@@ -112,7 +112,8 @@ docker pull hello-world
 
 如果在没有 VPN 的机器上运行，可以用另一台已拉取好镜像和模型的机器导出，再离线导入目标机器。
 
-> 项目 `exports/` 目录已包含预导出的镜像和模型文件，可直接拷贝使用。
+> **下载地址**：[夸克网盘](https://pan.quark.cn/s/64ad463760f0)（9.1GB，含全部 4 个文件）。
+> 下载后解压到项目根目录，目录结构应为 `exports/postgres-15-alpine.tar`、`exports/redis-7-alpine.tar`、`exports/ollama-latest.tar`、`exports/ollama-models.tar.gz`，然后直接跳到下方 [导入步骤](#导入目标机器)。
 
 **导出文件对应关系：**
 

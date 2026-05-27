@@ -1,16 +1,10 @@
 <script setup lang="ts">
 import { ref, nextTick, watch } from "vue";
-import { streamChat } from "@/lib/api.js";
+import { streamChat, api } from "@/lib/api.js";
 import MessageBubble from "./MessageBubble.vue";
-import type { Message, ChunkSource } from "@/types.js";
+import type { Message, ChunkSource, Conversation } from "@/types.js";
 
-const props = defineProps<{ kbId: string }>();
-
-interface ChatResult {
-  answer: string;
-  sources: ChunkSource[];
-  conversationId: string;
-}
+const props = defineProps<{ kbId: string; loadConvId?: string }>();
 
 const messages = ref<Message[]>([]);
 const question = ref("");
@@ -19,6 +13,24 @@ const thinking = ref("");
 const error = ref("");
 const convId = ref<string | null>(null);
 const messagesEl = ref<HTMLElement | null>(null);
+
+// 加载历史对话
+watch(
+  () => props.loadConvId,
+  async (id) => {
+    if (!id) return;
+    try {
+      const res = await api.get<Conversation>(`/conversations/${id}`);
+      const conv = res.data;
+      messages.value = (conv.messages || []).map((m) => ({
+        id: m.id, role: m.role as "user" | "assistant",
+        content: m.content, sources: m.sources, createdAt: m.createdAt,
+      }));
+      convId.value = conv.id;
+    } catch { /* ignore */ }
+  },
+  { immediate: true },
+);
 
 watch(
   () => props.kbId,
