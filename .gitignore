@@ -10,6 +10,10 @@ data/
 logs/
 backups/
 
+# omc状态文件
+.omc/state/
+.omc/sessions/
+
 # Docker 离线导出（大文件，不提交）
 exports/
 

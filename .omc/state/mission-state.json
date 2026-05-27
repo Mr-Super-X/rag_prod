@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-27T09:03:55.831Z",
+  "updatedAt": "2026-05-27T09:43:05.178Z",
   "missions": [
     {
       "id": "session:088cbfb2-c249-4702-8e5d-fc1b1df42dab:none",
@@ -165,15 +165,15 @@
       "name": "none",
       "objective": "Session mission",
       "createdAt": "2026-05-27T09:01:27.887Z",
-      "updatedAt": "2026-05-27T09:03:55.831Z",
+      "updatedAt": "2026-05-27T09:43:05.178Z",
       "status": "done",
-      "workerCount": 1,
+      "workerCount": 2,
       "taskCounts": {
-        "total": 1,
+        "total": 2,
         "pending": 0,
         "blocked": 0,
         "inProgress": 0,
-        "completed": 1,
+        "completed": 2,
         "failed": 0
       },
       "agents": [
@@ -186,6 +186,16 @@
           "latestUpdate": "completed",
           "completedSummary": null,
           "updatedAt": "2026-05-27T09:03:55.831Z"
+        },
+        {
+          "name": "code-explorer:ae86bd4",
+          "role": "code-explorer",
+          "ownership": "ae86bd4a542bcc285",
+          "status": "done",
+          "currentStep": null,
+          "latestUpdate": "completed",
+          "completedSummary": null,
+          "updatedAt": "2026-05-27T09:43:05.178Z"
         }
       ],
       "timeline": [
@@ -204,6 +214,22 @@
           "agent": "Explore:a607330",
           "detail": "completed",
           "sourceKey": "session-stop:a6073302799306dfe"
+        },
+        {
+          "id": "session-start:ae86bd4a542bcc285:2026-05-27T09:39:02.509Z",
+          "at": "2026-05-27T09:39:02.509Z",
+          "kind": "update",
+          "agent": "code-explorer:ae86bd4",
+          "detail": "started code-explorer:ae86bd4",
+          "sourceKey": "session-start:ae86bd4a542bcc285"
+        },
+        {
+          "id": "session-stop:ae86bd4a542bcc285:2026-05-27T09:43:05.178Z",
+          "at": "2026-05-27T09:43:05.178Z",
+          "kind": "completion",
+          "agent": "code-explorer:ae86bd4",
+          "detail": "completed",
+          "sourceKey": "session-stop:ae86bd4a542bcc285"
         }
       ]
     }

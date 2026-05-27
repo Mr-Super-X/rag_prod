@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-企业级 RAG 知识库平台。后端 Fastify + TypeScript，前端 Vue 3 + Vite。支持多知识库管理、文档摄入（PDF/Word/MD/TXT/XLSX/PPTX）、混合检索（向量 + BM25 + RRF 融合）、多轮对话（上下文改写）、SSE 流式输出、引用来源追溯与高亮、文档在线预览、对话搜索、答案反馈（赞/踩）、操作审计日志、API Key 鉴权、管理控制台（用户/KB/使用概览/审计/反馈统计）。
+企业级 RAG 知识库平台。后端 Fastify + TypeScript，前端 Vue 3 + Vite。支持多知识库管理、文档摄入（PDF/Word/MD/TXT/XLSX/PPTX）、混合检索（向量 + BM25 + RRF 融合）、多轮对话（上下文改写）、SSE 流式输出、引用来源追溯与高亮、文档在线预览、对话搜索/导出/删除、答案反馈（赞/踩）、操作审计日志、API Key 鉴权、管理控制台（用户/KB/使用概览/审计/反馈统计）。
 
 ## 开发环境
 
@@ -35,13 +35,32 @@ npm run test:e2e
 
 # 数据库备份
 npm run backup
+
+# 类型检查 & 构建
+npm run build
+
+# 生产启动
+npm run start
+
+# 监听测试
+npm run test:watch
+
+# 数据库可视化
+npm run db:studio
+
+# 重启 Docker 基础设施
+npm run docker:restart
 ```
 
 ## 技术栈
 
 | 层 | 技术 |
 |----|------|
-| 后端框架 | Fastify + `@fastify/jwt`, `@fastify/cors`, `@fastify/multipart`, `@fastify/swagger` |
+| 后端框架 | Fastify + `@fastify/jwt`, `@fastify/cors`, `@fastify/multipart`, `@fastify/swagger`, `@fastify/rate-limit` |
+| 密码/哈希 | bcryptjs（密码哈希）、HMAC-SHA256（API Key 哈希） |
+| 文档解析 | pdf-parse, mammoth (docx), xlsx, node:child_process (pptx) |
+| 日志 | pino + pino-pretty（`src/lib/logger.ts`） |
+| 数据库驱动 | `postgres` (Drizzle ORM 底层驱动) |
 | 数据库 | PostgreSQL + Drizzle ORM（`src/db/schema.ts` → `drizzle-kit generate/migrate`） |
 | 向量库 | LanceDB（嵌入式，数据在 `data/lancedb/`） |
 | LLM | Ollama — Qwen2.5-7B（生成，`src/pipeline/generator.ts`），可选 DeepSeek API |
@@ -64,6 +83,8 @@ POST /api/kb/:id/docs
       → embed(调 Ollama BGE-m3，每批 5 条)
       → insertVectors(LanceDB) + 写入 PG chunks 表 + indexBM25(Redis 倒排)
       → 更新文档 status=ready
+  注：开启 `INCREMENTAL_INDEX=true` 时，仅对新/变更的 chunk 做 embedding，
+  未变 chunk 复用已有点位，已删除 chunk 从向量库移除。
 ```
 
 ### 问答流程
@@ -75,11 +96,14 @@ POST /api/kb/:id/chat
       1. 创建/获取 conversation
       2. rewriteQuestion(LLM 上下文改写，补全指代)
       3. 保存用户消息
-      4. retrieve(kbId, rewrittenQuestion):
+      4. Agent 拦截（AGENT_ENABLED=true 时）：detectAndExecute() 检测时间/计算等
+         意图 → 命中则直接返回函数结果，跳过检索
+      5. retrieve(kbId, rewrittenQuestion):
            embedSingle(query) → searchVectors(LanceDB, topK=25)
            + bm25Search(Redis 倒排，中文 jieba 分词/bigram 降级)
-           → RRF 融合(分数重排) → 可选 reranker → 返回 topK=10
-      5. generate(context + history) 调 Ollama chat → 保存回答 → 返回
+           → RRF 融合(分数重排) → 可选 reranker(列表式精排) → 返回 topK=10
+      6. generate(context + history) 调 Ollama chat → validateAndInjectCitations()
+         验证引用有效性/兜底 bigram 注入 → 保存回答 → 返回
 ```
 
 ### 路由注册方式
@@ -117,14 +141,18 @@ API Key 鉴权：用户可在设置页生成 `ak_` 前缀的 API Key（HMAC-SHA2
 - 生产部署用 PM2（`ecosystem.config.cjs`）
 - LLM 提供者支持切换：`LLM_PROVIDER=ollama`（本地 CPU，慢但免费）或 `LLM_PROVIDER=deepseek`（云端 API，秒级但需 `DEEPSEEK_API_KEY`），失败自动降级到本地
 - Agent 功能通过 `AGENT_ENABLED=true` 开关控制（意图检测 + 时间查询 + 计算器），检索前拦截
+- 增量索引通过 `INCREMENTAL_INDEX=true` 开启（hash 比对跳过未变 chunk，仅新增/变更的做 embedding）
+- 精排候选数由 `RERANKER_TOP_K` 控制（默认 25），传给 LLM 做列表式排序后取 `FINAL_TOP_K`（默认 10）条
+- JWT 过期时间当前硬编码（access 15m / refresh 7d），`config.ts` 中 `JWT_ACCESS_EXPIRY`/`JWT_REFRESH_EXPIRY` 已定义但尚未接入
 - KB 多租户隔离：`kb_members` 表 + `requireKBAccess` 中间件，非成员/非创建者无法访问
 - 速率限制：全局 60 req/min，超标返回 429
 - 文档进度轮询在前端自动处理（`DocList.vue` 每 3 秒检查，全部就绪后停止）
 - 备份系统：`npm run backup` 自动备份 PG dump + LanceDB tar.gz + 上传文件，7 天自动清理
 - 引用高亮：LLM prompt 要求输出 [1][2] 标注，后端 `validateAndInjectCitations()` 验证/兜底注入，前端 `MessageBubble.vue` 解析为可点击引用编号
 - 文档预览：`GET /api/kb/:id/docs/:docId/preview` 分页返回 chunk 拼接文本，`DocPreviewModal.vue` 弹窗展示
-- 对话搜索：`ConversationList.vue` 前端 computed 标题过滤，搜索时暂停 5s 轮询
+- 对话搜索：`ConversationList.vue` 前端 computed 标题过滤，列表仅在初始加载和点击"新对话"时刷新
+- 对话删除：`ConversationList.vue` 每条对话支持删除（`DELETE /api/conversations/:id`），confirm 确认后调用后端校验归属并级联删除消息
 - 消息反馈：`POST /api/messages/:id/feedback` upsert 切换赞/踩，`message_feedback` 表存储
 - 审计日志：`src/lib/audit.ts` → `logAudit()` 记录登录/创建KB/删除KB/上传文档/删除文档，fire-and-forget
 - API Key：HMAC-SHA256 哈希存储（`crypto.createHmac("sha256", JWT_SECRET)`），`authenticateApiKey` 中间件，chat 路由 JWT/API Key 双重鉴权，`SettingsPage.vue` 管理
-- 管理控制台：`AdminPage.vue` 6 个标签（使用概览/用户管理/KB管理/知识库管理/审计日志/反馈概览）
+- 管理控制台：`AdminPage.vue` 5 个标签（使用概览/用户管理/KB管理/审计日志/反馈概览）

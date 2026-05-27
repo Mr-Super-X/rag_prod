@@ -243,6 +243,12 @@
   },
   "hotPaths": [
     {
+      "path": "CLAUDE.md",
+      "accessCount": 51,
+      "lastAccessed": 1779875956426,
+      "type": "file"
+    },
+    {
       "path": "README.md",
       "accessCount": 40,
       "lastAccessed": 1779871386134,
@@ -250,44 +256,44 @@
     },
     {
       "path": "src\\routes\\chat.ts",
-      "accessCount": 33,
-      "lastAccessed": 1779872504216,
-      "type": "file"
-    },
-    {
-      "path": "CLAUDE.md",
-      "accessCount": 26,
-      "lastAccessed": 1779873810537,
+      "accessCount": 35,
+      "lastAccessed": 1779875790968,
       "type": "file"
     },
     {
       "path": "src\\routes\\kb.ts",
-      "accessCount": 25,
-      "lastAccessed": 1779872504807,
+      "accessCount": 26,
+      "lastAccessed": 1779874768004,
       "type": "file"
     },
     {
       "path": "src\\middleware\\auth.ts",
-      "accessCount": 24,
-      "lastAccessed": 1779872677260,
-      "type": "file"
-    },
-    {
-      "path": "src\\services\\kb.service.ts",
-      "accessCount": 21,
-      "lastAccessed": 1779872660626,
+      "accessCount": 25,
+      "lastAccessed": 1779874761345,
       "type": "file"
     },
     {
       "path": "src\\db\\schema.ts",
-      "accessCount": 21,
-      "lastAccessed": 1779872677990,
+      "accessCount": 22,
+      "lastAccessed": 1779874760200,
+      "type": "file"
+    },
+    {
+      "path": "src\\services\\kb.service.ts",
+      "accessCount": 22,
+      "lastAccessed": 1779874798650,
       "type": "file"
     },
     {
       "path": "src\\routes\\doc.ts",
+      "accessCount": 20,
+      "lastAccessed": 1779874769082,
+      "type": "file"
+    },
+    {
+      "path": "src\\routes\\auth.ts",
       "accessCount": 19,
-      "lastAccessed": 1779872505484,
+      "lastAccessed": 1779874771027,
       "type": "file"
     },
     {
@@ -297,57 +303,63 @@
       "type": "file"
     },
     {
-      "path": "src\\routes\\auth.ts",
-      "accessCount": 18,
-      "lastAccessed": 1779872504674,
-      "type": "file"
-    },
-    {
       "path": "src\\services\\chat.service.ts",
-      "accessCount": 17,
-      "lastAccessed": 1779872662450,
-      "type": "file"
-    },
-    {
-      "path": "src\\app.ts",
-      "accessCount": 16,
-      "lastAccessed": 1779872501834,
+      "accessCount": 18,
+      "lastAccessed": 1779874778448,
       "type": "file"
     },
     {
       "path": "src\\config.ts",
-      "accessCount": 16,
-      "lastAccessed": 1779872651440,
+      "accessCount": 17,
+      "lastAccessed": 1779874759339,
+      "type": "file"
+    },
+    {
+      "path": "src\\app.ts",
+      "accessCount": 17,
+      "lastAccessed": 1779874767407,
       "type": "file"
     },
     {
       "path": "src\\pipeline\\generator.ts",
-      "accessCount": 10,
-      "lastAccessed": 1779872671352,
+      "accessCount": 11,
+      "lastAccessed": 1779874781654,
       "type": "file"
     },
     {
       "path": "src\\pipeline\\parser.ts",
-      "accessCount": 9,
-      "lastAccessed": 1779872670205,
+      "accessCount": 10,
+      "lastAccessed": 1779874781546,
       "type": "file"
     },
     {
       "path": "src\\pipeline\\reranker.ts",
-      "accessCount": 8,
-      "lastAccessed": 1779872671566,
+      "accessCount": 9,
+      "lastAccessed": 1779874788741,
       "type": "file"
     },
     {
       "path": "src\\services\\doc.service.ts",
-      "accessCount": 7,
-      "lastAccessed": 1779872660962,
+      "accessCount": 8,
+      "lastAccessed": 1779874777641,
       "type": "file"
     },
     {
       "path": "src\\services\\context.service.ts",
+      "accessCount": 8,
+      "lastAccessed": 1779874792445,
+      "type": "file"
+    },
+    {
+      "path": "client\\src\\lib\\api.ts",
+      "accessCount": 8,
+      "lastAccessed": 1779875802084,
+      "type": "file"
+    },
+    {
+      "path": "src\\services\\retrieval.service.ts",
       "accessCount": 7,
-      "lastAccessed": 1779872661757,
+      "lastAccessed": 1779874790457,
       "type": "file"
     },
     {
@@ -363,39 +375,63 @@
       "type": "file"
     },
     {
-      "path": "client\\src\\lib\\api.ts",
-      "accessCount": 6,
-      "lastAccessed": 1779872556100,
-      "type": "file"
-    },
-    {
       "path": "vitest.config.ts",
       "accessCount": 6,
       "lastAccessed": 1779872650722,
       "type": "file"
     },
     {
-      "path": "src\\services\\retrieval.service.ts",
-      "accessCount": 6,
-      "lastAccessed": 1779872663023,
-      "type": "file"
-    },
-    {
       "path": "package.json",
-      "accessCount": 5,
-      "lastAccessed": 1779872649898,
+      "accessCount": 6,
+      "lastAccessed": 1779874758592,
       "type": "file"
     },
     {
       "path": "src\\lib\\errors.ts",
-      "accessCount": 4,
-      "lastAccessed": 1779872652954,
+      "accessCount": 5,
+      "lastAccessed": 1779874761261,
       "type": "file"
     },
     {
       "path": "src\\services\\auth.service.ts",
+      "accessCount": 5,
+      "lastAccessed": 1779874799334,
+      "type": "file"
+    },
+    {
+      "path": "src\\pipeline\\embedder.ts",
       "accessCount": 4,
-      "lastAccessed": 1779872659469,
+      "lastAccessed": 1779874779444,
+      "type": "file"
+    },
+    {
+      "path": "src\\pipeline\\splitter.ts",
+      "accessCount": 4,
+      "lastAccessed": 1779874780398,
+      "type": "file"
+    },
+    {
+      "path": "src\\lib\\vectordb.ts",
+      "accessCount": 4,
+      "lastAccessed": 1779874791202,
+      "type": "file"
+    },
+    {
+      "path": "src\\types.ts",
+      "accessCount": 4,
+      "lastAccessed": 1779874800198,
+      "type": "file"
+    },
+    {
+      "path": "src\\lib\\redis.ts",
+      "accessCount": 4,
+      "lastAccessed": 1779874801949,
+      "type": "file"
+    },
+    {
+      "path": "client\\src\\stores\\auth.ts",
+      "accessCount": 4,
+      "lastAccessed": 1779874814332,
       "type": "file"
     },
     {
@@ -417,42 +453,6 @@
       "type": "file"
     },
     {
-      "path": "client\\src\\stores\\auth.ts",
-      "accessCount": 3,
-      "lastAccessed": 1779872555981,
-      "type": "file"
-    },
-    {
-      "path": "src\\types.ts",
-      "accessCount": 3,
-      "lastAccessed": 1779872652732,
-      "type": "file"
-    },
-    {
-      "path": "src\\lib\\vectordb.ts",
-      "accessCount": 3,
-      "lastAccessed": 1779872653782,
-      "type": "file"
-    },
-    {
-      "path": "src\\pipeline\\splitter.ts",
-      "accessCount": 3,
-      "lastAccessed": 1779872668579,
-      "type": "file"
-    },
-    {
-      "path": "src\\pipeline\\embedder.ts",
-      "accessCount": 3,
-      "lastAccessed": 1779872669399,
-      "type": "file"
-    },
-    {
-      "path": "src\\lib\\redis.ts",
-      "accessCount": 3,
-      "lastAccessed": 1779872679424,
-      "type": "file"
-    },
-    {
       "path": "src\\AGENTS.md",
       "accessCount": 3,
       "lastAccessed": 1779874233373,
@@ -465,15 +465,15 @@
       "type": "file"
     },
     {
-      "path": "src\\server.ts",
-      "accessCount": 2,
-      "lastAccessed": 1779872502039,
+      "path": "src\\db\\index.ts",
+      "accessCount": 3,
+      "lastAccessed": 1779874800979,
       "type": "file"
     },
     {
-      "path": "src\\db\\index.ts",
-      "accessCount": 2,
-      "lastAccessed": 1779872530349,
+      "path": "src\\server.ts",
+      "accessCount": 3,
+      "lastAccessed": 1779874802337,
       "type": "file"
     },
     {

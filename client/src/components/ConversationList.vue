@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { api } from "@/lib/api.js";
 import { useAsync } from "@/composables/useAsync.js";
 import type { Conversation } from "@/types.js";
@@ -11,33 +11,17 @@ const convs = useAsync<Conversation[]>();
 const loadingId = ref<string | null>(null);
 const searchKeyword = ref("");
 
-let pollTimer: ReturnType<typeof setInterval> | null = null;
-
 onMounted(() => {
   fetchConvs();
-  startPolling();
-});
-
-onUnmounted(() => {
-  if (pollTimer) clearInterval(pollTimer);
-});
-
-// 搜索时暂停轮询
-watch(searchKeyword, (kw) => {
-  if (kw) {
-    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-  } else {
-    startPolling();
-  }
 });
 
 function fetchConvs() {
   convs.execute(() => api.get<Conversation[]>(`/kb/${props.kbId}/conversations`).then((r) => r.data));
 }
 
-function startPolling() {
-  if (pollTimer) return;
-  pollTimer = setInterval(() => fetchConvs(), 5000);
+function handleNewChat() {
+  emit("newChat");
+  fetchConvs();
 }
 
 const filteredConvs = computed(() => {
@@ -73,10 +57,22 @@ async function downloadExport(convId: string) {
 async function loadConv(convId: string) {
   loadingId.value = convId;
   try {
-    const r = await api.get<Conversation>(`/conversations/${convId}`);
+    await api.get<Conversation>(`/conversations/${convId}`);
     emit("select", convId);
   } catch { /* ignore */ }
   loadingId.value = null;
+}
+
+const deletingId = ref<string | null>(null);
+
+async function deleteConv(convId: string) {
+  if (!confirm("确定要删除这条对话记录吗？")) return;
+  deletingId.value = convId;
+  try {
+    await api.delete(`/conversations/${convId}`);
+    fetchConvs();
+  } catch { /* ignore */ }
+  deletingId.value = null;
 }
 </script>
 
@@ -84,7 +80,7 @@ async function loadConv(convId: string) {
   <div class="conv-list">
     <div class="conv-header">
       <h4>对话历史</h4>
-      <button class="btn-new" @click="emit('newChat')">+ 新对话</button>
+      <button class="btn-new" @click="handleNewChat">+ 新对话</button>
     </div>
 
     <input
@@ -110,7 +106,10 @@ async function loadConv(convId: string) {
         <span class="conv-title">{{ conv.title || "新对话" }}</span>
         <div class="conv-row">
           <span class="conv-date">{{ new Date(conv.updatedAt).toLocaleDateString("zh-CN") }}</span>
-          <button class="conv-export" title="导出为 Markdown" @click.stop="downloadExport(conv.id)">⬇</button>
+          <div class="conv-actions">
+            <button class="conv-export" title="导出为 Markdown" @click.stop="downloadExport(conv.id)">⬇</button>
+            <button class="conv-delete" title="删除对话" @click.stop="deleteConv(conv.id)">×</button>
+          </div>
         </div>
       </button>
     </div>
@@ -141,6 +140,9 @@ h4 { font-size: 15px; font-weight: 600; }
 .conv-title { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 .conv-row { display: flex; align-items: center; justify-content: space-between; }
 .conv-date { font-size: 11px; color: var(--color-text-secondary); }
+.conv-actions { display: flex; align-items: center; gap: 4px; }
 .conv-export { font-size: 11px; color: var(--color-primary); background: transparent; padding: 2px 4px; border-radius: 4px; }
 .conv-export:hover { background: #eef2ff; }
+.conv-delete { font-size: 14px; color: #999; background: transparent; padding: 0 4px; border-radius: 4px; line-height: 1; }
+.conv-delete:hover { color: #e53e3e; background: #fff5f5; }
 </style>
