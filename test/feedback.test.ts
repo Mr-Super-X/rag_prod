@@ -1,47 +1,31 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { getApp } from "./setup.js";
+import { db, schema } from "../src/db/index.js";
 
 let tokenA: string;
 let tokenB: string;
-let userIdA: string;
 let msgId: string;
 
 beforeAll(async () => {
   const app = getApp();
 
-  // 注册用户 A
-  await app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "user_a", password: "test123456" } });
-  const loginA = await app.inject({ method: "POST", url: "/api/auth/login", payload: { username: "user_a", password: "test123456" } });
+  // 注册用户 A 和 B
+  await app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "fb_a", password: "test123456" } });
+  const loginA = await app.inject({ method: "POST", url: "/api/auth/login", payload: { username: "fb_a", password: "test123456" } });
   tokenA = loginA.json().data.token;
-  userIdA = loginA.json().data.user.id;
+  const userIdA = loginA.json().data.user.id;
 
-  // 注册用户 B
-  await app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "user_b", password: "test123456" } });
-  const loginB = await app.inject({ method: "POST", url: "/api/auth/login", payload: { username: "user_b", password: "test123456" } });
+  await app.inject({ method: "POST", url: "/api/auth/register", payload: { username: "fb_b", password: "test123456" } });
+  const loginB = await app.inject({ method: "POST", url: "/api/auth/login", payload: { username: "fb_b", password: "test123456" } });
   tokenB = loginB.json().data.token;
 
-  // 用户 A 创建 KB + conversation + message（用于测试反馈）
-  const kb = await app.inject({ method: "POST", url: "/api/kb", headers: { authorization: `Bearer ${tokenA}` }, payload: { name: "feedback kb" } });
+  // 直接在 DB 创建消息（绕过 Ollama）
+  const kb = await app.inject({ method: "POST", url: "/api/kb", headers: { authorization: `Bearer ${tokenA}` }, payload: { name: "fb kb" } });
   const kbId = kb.json().data.id;
 
-  const conv = await app.inject({
-    method: "POST", url: `/api/kb/${kbId}/chat`,
-    headers: { authorization: `Bearer ${tokenA}` },
-    payload: { question: "测试问题" },
-  });
-  msgId = conv.json().data?.conversationId
-    ? (await app.inject({ method: "GET", url: `/api/conversations/${conv.json().data.conversationId}`, headers: { authorization: `Bearer ${tokenA}` } })).json().data.messages[1]?.id
-    : null;
-
-  // 如果上面没好，直接查 conversations 列表拿消息
-  if (!msgId) {
-    const convs = await app.inject({ method: "GET", url: `/api/kb/${kbId}/conversations`, headers: { authorization: `Bearer ${tokenA}` } });
-    const cId = convs.json().data[0]?.id;
-    if (cId) {
-      const msgs = await app.inject({ method: "GET", url: `/api/conversations/${cId}`, headers: { authorization: `Bearer ${tokenA}` } });
-      msgId = msgs.json().data.messages?.find((m: { role: string }) => m.role === "assistant")?.id;
-    }
-  }
+  const [conv] = await db.insert(schema.conversations).values({ kbId, userId: userIdA, title: "测试对话" }).returning();
+  const [msg] = await db.insert(schema.messages).values({ conversationId: conv.id, role: "assistant", content: "测试回答" }).returning();
+  msgId = msg.id;
 });
 
 describe("Feedback", () => {

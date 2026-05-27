@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"ls -la \\\"D:\\\\personal\\\\AI\\\\rag_prod\\\\src\\\\db\\\\migrations\\\\\\\" 2>&1\",\"description\":\"Check migration files\"}",
-  "error": "Exit code 2\n/usr/bin/bash: eval: line 1: unexpected EOF while looking for matching `\"'",
-  "timestamp": "2026-05-27T08:41:11.159Z",
+  "tool_input_preview": "{\"command\":\"cd D:/personal/AI/rag_prod && npx vitest run --reporter=verbose 2>&1\",\"timeout\":120000,\"description\":\"Run all unit tests\"}",
+  "error": "Exit code 1\nnpm warn Unknown user config \"home\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\nnpm warn Unknown user config \"phantomjs_cdnurl\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\nnpm warn Unknown user config \"chromedriver_cdnurl\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\nnpm warn Unknown user conf...",
+  "timestamp": "2026-05-27T09:13:43.461Z",
   "retry_count": 1
 }
