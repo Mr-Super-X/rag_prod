@@ -2,6 +2,7 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
+    exclude: ["test/e2e/**", "node_modules/**"],
     globals: true,
     testTimeout: 30000,
     hookTimeout: 30000,

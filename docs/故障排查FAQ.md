@@ -148,7 +148,7 @@ curl http://localhost:11434/api/tags
 docker exec -it rag_prod-postgres-1 psql -U raguser -d ragdb
 
 # 删除所有数据
-DROP TABLE IF EXISTS messages, conversations, chunks, documents, refresh_tokens, knowledge_bases, users CASCADE;
+DROP TABLE IF EXISTS message_feedback, messages, conversations, chunks, documents, kb_members, refresh_tokens, api_keys, audit_logs, knowledge_bases, users CASCADE;
 
 # 退出
 \q
@@ -200,7 +200,7 @@ curl http://localhost:11434/api/tags
 **原因**：通常是 API Key 哈希算法与数据库记录不匹配，或 `keyPrefix` 字段长度超限。
 
 检查：
-- 确认 `src/routes/auth.ts` 和 `src/middleware/auth.ts` 中 keyHash 使用 `crypto.scrypt`（非 SHA256）
+- 确认 `src/routes/auth.ts` 和 `src/middleware/auth.ts` 中 keyHash 使用 `crypto.createHmac("sha256", JWT_SECRET)`
 - 确认 `src/db/schema.ts` 中 `keyPrefix` 为 `varchar(10)`
 - 确认已执行 `npx drizzle-kit generate && npx drizzle-kit migrate` 创建 `api_keys` 表
 

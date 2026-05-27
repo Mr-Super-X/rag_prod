@@ -338,7 +338,7 @@ rag_prod/
 │   ├── app.ts                  # Fastify 工厂
 │   ├── config.ts               # 环境变量配置
 │   ├── db/
-│   │   ├── schema.ts           # 数据库表定义（6 实体）
+│   │   ├── schema.ts           # 数据库表定义（11 张表）
 │   │   └── index.ts            # Drizzle 连接
 │   ├── lib/
 │   │   ├── errors.ts           # 错误类 + 错误处理器
@@ -489,8 +489,8 @@ LLM_MODEL=qwen2.5:3b
 | CPU 推理慢 | 大文档处理需 5-10 分钟 | 异步处理，不阻塞上传 |
 | 无 GPU 加速 | 无 NVIDIA 显卡即走 CPU | 可接云端 LLM API |
 | 单机部署 | 不可横向扩展 | 20 人以下够用 |
-| 无 Reranker | 检索精度有提升空间 | V2 加 |
-| JWT 无过期 | 安全风险 | 短期使用可接受 |
+| Reranker 默认关闭 | 开启后每次问答增加 LLM 调用 | 按需开启：`.env` 中 `RERANKER_ENABLED=true` |
+| JWT 需定期重登 | refresh token 7 天过期 | 前端自动刷新，过期后重新登录即可 |
 
 ## 参考文档
 
@@ -519,6 +519,8 @@ LLM_MODEL=qwen2.5:3b
 | [功能清单](docs/功能清单.md) | V1-V11 全部功能 + 实现位置索引 |
 | [迭代开发全记录](docs/迭代开发全记录.md) | V1-V11 完整踩坑记录 |
 | [测试策略](docs/测试策略.md) | 测试架构、分层与编写规范 |
+| [权限模型说明](docs/权限模型说明.md) | 角色、鉴权中间件、路由权限矩阵 |
+| [数据库设计文档](docs/数据库设计文档.md) | 11 张表结构、ER 图、索引策略 |
 | [CHANGELOG](../CHANGELOG.md) | 版本变更记录 |
 | [CONTRIBUTING](../CONTRIBUTING.md) | 开发环境搭建与 PR 流程 |
 

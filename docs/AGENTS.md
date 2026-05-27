@@ -33,6 +33,8 @@
 | `功能清单.md` | V1-V11 全部功能 + 实现位置索引 |
 | `迭代开发全记录.md` | V1-V11 完整踩坑记录（38 个） |
 | `测试策略.md` | 测试架构、分层、运行方式与编写规范 |
+| `权限模型说明.md` | 完整 RBAC：全局角色、KB 角色、鉴权中间件、路由权限矩阵 |
+| `数据库设计文档.md` | 11 张表结构、字段、索引、外键关系、ER 图 |
 
 ## For AI Agents
 
@@ -40,5 +42,6 @@
 - 新增文档用 `[序号]-中文主题.md` 命名
 - 故障排查类内容应追加到 `故障排查FAQ.md`，而非 README
 - 新增/修改环境变量需同步更新 `环境变量参考.md` 和 `src/config.ts`
-- 新增 DB 表需同步更新 drizzle schema + migration，并更新 CLAUDE.md 中的表计数
-- API Key 使用 scrypt 哈希存储，`authenticateApiKey` 中间件与 JWT 并行鉴权
+- 新增 DB 表需同步更新 `数据库设计文档.md` + drizzle schema + migration，并更新 CLAUDE.md 中的表计数
+- 修改权限逻辑需同步更新 `权限模型说明.md` 中的路由矩阵
+- API Key 使用 HMAC-SHA256 哈希存储，`authenticateApiKey` 中间件与 JWT 并行鉴权

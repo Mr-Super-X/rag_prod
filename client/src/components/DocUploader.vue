@@ -40,7 +40,7 @@ function triggerInput() {
     <input
       ref="fileInput"
       type="file"
-      accept=".pdf,.docx,.md,.txt"
+      accept=".pdf,.docx,.xlsx,.pptx,.md,.txt"
       style="display:none"
       @change="handleFileChange"
     />
