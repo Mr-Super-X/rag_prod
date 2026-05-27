@@ -244,26 +244,38 @@
   "hotPaths": [
     {
       "path": "README.md",
-      "accessCount": 39,
-      "lastAccessed": 1779870898078,
+      "accessCount": 40,
+      "lastAccessed": 1779871386134,
       "type": "file"
     },
     {
       "path": "src\\routes\\chat.ts",
-      "accessCount": 30,
-      "lastAccessed": 1779870617281,
+      "accessCount": 32,
+      "lastAccessed": 1779871429497,
       "type": "file"
     },
     {
       "path": "src\\routes\\kb.ts",
-      "accessCount": 22,
-      "lastAccessed": 1779870607776,
+      "accessCount": 24,
+      "lastAccessed": 1779871428138,
       "type": "file"
     },
     {
       "path": "src\\middleware\\auth.ts",
-      "accessCount": 21,
-      "lastAccessed": 1779870647622,
+      "accessCount": 22,
+      "lastAccessed": 1779871427700,
+      "type": "file"
+    },
+    {
+      "path": "src\\services\\kb.service.ts",
+      "accessCount": 19,
+      "lastAccessed": 1779871444403,
+      "type": "file"
+    },
+    {
+      "path": "src\\db\\schema.ts",
+      "accessCount": 19,
+      "lastAccessed": 1779871452647,
       "type": "file"
     },
     {
@@ -273,9 +285,9 @@
       "type": "file"
     },
     {
-      "path": "src\\services\\kb.service.ts",
+      "path": "src\\routes\\doc.ts",
       "accessCount": 18,
-      "lastAccessed": 1779870647918,
+      "lastAccessed": 1779871443554,
       "type": "file"
     },
     {
@@ -285,39 +297,33 @@
       "type": "file"
     },
     {
-      "path": "src\\db\\schema.ts",
-      "accessCount": 15,
-      "lastAccessed": 1779870586736,
-      "type": "file"
-    },
-    {
       "path": "src\\routes\\auth.ts",
-      "accessCount": 15,
-      "lastAccessed": 1779870617118,
-      "type": "file"
-    },
-    {
-      "path": "src\\routes\\doc.ts",
-      "accessCount": 15,
-      "lastAccessed": 1779871012135,
+      "accessCount": 17,
+      "lastAccessed": 1779871446078,
       "type": "file"
     },
     {
       "path": "src\\services\\chat.service.ts",
-      "accessCount": 14,
-      "lastAccessed": 1779870648114,
+      "accessCount": 15,
+      "lastAccessed": 1779871500733,
       "type": "file"
     },
     {
       "path": "src\\app.ts",
-      "accessCount": 13,
-      "lastAccessed": 1779870661781,
+      "accessCount": 15,
+      "lastAccessed": 1779871546333,
       "type": "file"
     },
     {
       "path": "src\\config.ts",
-      "accessCount": 10,
-      "lastAccessed": 1779870662219,
+      "accessCount": 14,
+      "lastAccessed": 1779871447140,
+      "type": "file"
+    },
+    {
+      "path": "src\\pipeline\\generator.ts",
+      "accessCount": 8,
+      "lastAccessed": 1779871397290,
       "type": "file"
     },
     {
@@ -327,9 +333,15 @@
       "type": "file"
     },
     {
-      "path": "src\\pipeline\\generator.ts",
-      "accessCount": 7,
-      "lastAccessed": 1779870659522,
+      "path": "src\\pipeline\\reranker.ts",
+      "accessCount": 6,
+      "lastAccessed": 1779871430729,
+      "type": "file"
+    },
+    {
+      "path": "test\\setup.ts",
+      "accessCount": 6,
+      "lastAccessed": 1779871430907,
       "type": "file"
     },
     {
@@ -345,15 +357,15 @@
       "type": "file"
     },
     {
-      "path": "test\\setup.ts",
-      "accessCount": 5,
-      "lastAccessed": 1779870625923,
-      "type": "file"
-    },
-    {
       "path": "client\\src\\lib\\api.ts",
       "accessCount": 5,
       "lastAccessed": 1779870648300,
+      "type": "file"
+    },
+    {
+      "path": "src\\services\\context.service.ts",
+      "accessCount": 5,
+      "lastAccessed": 1779871514881,
       "type": "file"
     },
     {
@@ -363,51 +375,39 @@
       "type": "file"
     },
     {
-      "path": "src\\pipeline\\reranker.ts",
-      "accessCount": 4,
-      "lastAccessed": 1779870656890,
-      "type": "file"
-    },
-    {
-      "path": "src\\services\\context.service.ts",
-      "accessCount": 3,
-      "lastAccessed": 1779870628139,
-      "type": "file"
-    },
-    {
       "path": "src\\services\\retrieval.service.ts",
+      "accessCount": 4,
+      "lastAccessed": 1779871447561,
+      "type": "file"
+    },
+    {
+      "path": "docker-compose.mac.yml",
       "accessCount": 3,
-      "lastAccessed": 1779870631307,
+      "lastAccessed": 1779871402134,
+      "type": "file"
+    },
+    {
+      "path": "docker-compose.yml",
+      "accessCount": 3,
+      "lastAccessed": 1779871402292,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 3,
+      "lastAccessed": 1779871408931,
+      "type": "file"
+    },
+    {
+      "path": "ecosystem.config.cjs",
+      "accessCount": 3,
+      "lastAccessed": 1779871409073,
       "type": "file"
     },
     {
       "path": "src\\lib\\errors.ts",
       "accessCount": 2,
       "lastAccessed": 1779863996593,
-      "type": "file"
-    },
-    {
-      "path": "docker-compose.yml",
-      "accessCount": 2,
-      "lastAccessed": 1779870566687,
-      "type": "file"
-    },
-    {
-      "path": "docker-compose.mac.yml",
-      "accessCount": 2,
-      "lastAccessed": 1779870567061,
-      "type": "file"
-    },
-    {
-      "path": "ecosystem.config.cjs",
-      "accessCount": 2,
-      "lastAccessed": 1779870567920,
-      "type": "file"
-    },
-    {
-      "path": "package.json",
-      "accessCount": 2,
-      "lastAccessed": 1779870568113,
       "type": "file"
     },
     {
