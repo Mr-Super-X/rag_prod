@@ -18,8 +18,13 @@ export async function listKBs(userId: string) {
   if (memberRecords.length === 0) return owned;
 
   const memberKbIds = memberRecords.map((m) => m.kbId);
+  // 排除自己创建的（去重：creator 同时也是 kb_members 的 owner）
+  const ownedIds = new Set(owned.map((kb) => kb.id));
+  const extraIds = memberKbIds.filter((id) => !ownedIds.has(id));
+  if (extraIds.length === 0) return owned;
+
   const memberKbs = await db.select().from(knowledgeBases).where(
-    inArray(knowledgeBases.id, memberKbIds)
+    inArray(knowledgeBases.id, extraIds)
   );
   return [...owned, ...memberKbs];
 }

@@ -57,6 +57,8 @@ export async function chatRoutes(app: FastifyInstance) {
       } catch (err: unknown) {
         const e = err as { type?: string; message?: string; conversationId?: string };
         if (e.type === "fallback") {
+          reply.raw.write(`data: ${JSON.stringify({ done: true, agent: true, answer: e.message, conversationId: e.conversationId, sources: [] })}\n\n`);
+        } else if (e.type === "fallback") {
           reply.raw.write(`data: ${JSON.stringify({ done: true, fallback: true, answer: e.message, conversationId: e.conversationId, sources: [] })}\n\n`);
         } else {
           reply.raw.write(`data: ${JSON.stringify({ error: e.message || "Stream failed" })}\n\n`);

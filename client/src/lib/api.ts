@@ -125,7 +125,7 @@ export function streamChat(
   question: string,
   conversationId: string | undefined,
   onToken: (token: string) => void,
-  onDone: (result: { conversationId: string; sources: unknown[]; answer?: string; fallback?: boolean }) => void,
+  onDone: (result: { conversationId: string; sources: unknown[]; answer?: string; fallback?: boolean; agent?: boolean }) => void,
   onError: (err: Error) => void,
 ): AbortController {
   const controller = new AbortController();

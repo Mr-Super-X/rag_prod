@@ -72,6 +72,9 @@ async function send() {
       thinking.value = "";
       convId.value = result.conversationId;
       assistantMsg.sources = result.sources as ChunkSource[];
+      if (result.agent) {
+        assistantMsg.content = result.answer || "";
+      }
       if (result.fallback) {
         assistantMsg.content = result.answer || "";
       }

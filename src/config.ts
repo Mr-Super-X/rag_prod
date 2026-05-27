@@ -56,6 +56,7 @@ const envSchema = z.object({
   LLM_PROVIDER: z.enum(["ollama", "deepseek"]).default("ollama"),
   DEEPSEEK_API_KEY: z.string().default(""),
   DEEPSEEK_MODEL: z.string().default("deepseek-chat"),
+  AGENT_ENABLED: z.coerce.boolean().default(false),
 });
 
 export const config = envSchema.parse(process.env);

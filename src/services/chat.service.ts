@@ -1,6 +1,7 @@
 import { config } from "../config.js";
 import { retrieve } from "./retrieval.service.js";
 import { generate, streamGenerate, rewriteQuestion } from "../pipeline/generator.js";
+import { detectAndExecute } from "../pipeline/agent.js";
 import {
   createConversation,
   getConversation,
@@ -33,6 +34,18 @@ export async function ask(
 
   // 保存用户消息
   await addMessage(convId, "user", question);
+
+  // Agent: 检测函数调用
+  const agentResult = await detectAndExecute(rewrittenQuestion);
+  if (agentResult.isFunctionCall && agentResult.result) {
+    const answer = `Agent 执行结果：${agentResult.result}`;
+    await addMessage(convId, "assistant", answer, []);
+    if (history.length <= 2) {
+      const title = question.slice(0, 50) + (question.length > 50 ? "..." : "");
+      await updateConversationTitle(convId, title);
+    }
+    return { answer, sources: [], conversationId: convId };
+  }
 
   // 检索
   const sources = await retrieve(kbId, rewrittenQuestion);
@@ -90,6 +103,13 @@ export async function streamAsk(
 
   // 保存用户消息
   await addMessage(convId, "user", question);
+
+  // Agent: 检测函数调用
+  const agentResult = await detectAndExecute(rewrittenQuestion);
+  if (agentResult.isFunctionCall && agentResult.result) {
+    await addMessage(convId, "assistant", agentResult.result, []);
+    throw { type: "agent", message: agentResult.result, conversationId: convId };
+  }
 
   // 检索
   const sources = await retrieve(kbId, rewrittenQuestion);
