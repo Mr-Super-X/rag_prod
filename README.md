@@ -114,6 +114,18 @@ docker pull hello-world
 
 > 项目 `exports/` 目录已包含预导出的镜像和模型文件，可直接拷贝使用。
 
+**导出文件对应关系：**
+
+| 来源 | 类型 | 导出文件 | 大小 |
+|------|------|----------|------|
+| `docker-compose.yml` → `image: postgres:15-alpine` | Docker 镜像 | `postgres-15-alpine.tar` | ~95MB |
+| `docker-compose.yml` → `image: redis:7-alpine` | Docker 镜像 | `redis-7-alpine.tar` | ~17MB |
+| `docker-compose.yml` → `image: ollama/ollama:latest` | Docker 镜像 | `ollama-latest.tar` | ~4GB |
+| `ollama pull qwen2.5:7b` | 模型文件（存在数据卷内） | 合在 `ollama-models.tar.gz` 中 | |
+| `ollama pull bge-m3` | 模型文件（存在数据卷内） | | ~5.3GB |
+
+> **为什么是 4 个文件而非 5 个？** — `ollama pull` 拉取的是模型文件，不是 Docker 镜像。两个模型（qwen2.5:7b + bge-m3）都存储在同一个 Docker 数据卷 `rag_prod_ollamadata` 中，导出时整个卷打包为一个 `ollama-models.tar.gz`。恢复时解压该文件，两个模型同时就位。
+
 ### 导出（有网络的机器）
 
 ```bash
@@ -236,6 +248,9 @@ OLLAMA_URL=http://localhost:11434
 REDIS_URL=redis://localhost:6379
 JWT_SECRET=change-me-to-a-random-secret
 UPLOAD_DIR=./data/uploads
+# 以下两行可选：切换到云端 LLM 时取消注释并填入 API 密钥
+# LLM_PROVIDER=deepseek
+# DEEPSEEK_API_KEY=sk-你的密钥
 ```
 
 > 生产环境请修改 `JWT_SECRET` 为随机字符串。
@@ -256,6 +271,28 @@ npm run dev
 
 → API 地址：http://localhost:3000
 → Swagger 文档：http://localhost:3000/docs
+
+#### 5.1 切换 LLM 推理模式
+
+默认使用本地 Ollama（CPU 推理，慢）。如果要切换到云端 API 获得秒级回答：
+
+在 `.env` 中修改两行，重启后端：
+
+```
+# 本地模式（默认）
+LLM_PROVIDER=ollama
+
+# 云端模式（DeepSeek，秒级回答）
+LLM_PROVIDER=deepseek
+DEEPSEEK_API_KEY=sk-你的API密钥
+```
+
+| 模式 | 速度 | 成本 | 数据安全 |
+|------|------|------|---------|
+| `ollama` | 每个字 2-3 秒 | 免费 | 全部本地 |
+| `deepseek` | 秒级 | ¥0.001/次 | prompt 片段出内网 |
+
+> 两种模式共用同一个 `.env` 文件，**改一行 + 重启后端**即可切换。Embedding 始终走本地 BGE-m3，文档内容不出内网。DeepSeek 不可用时自动降级回 Ollama。
 
 ### 6. 启动前端
 

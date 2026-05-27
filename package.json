@@ -12,7 +12,8 @@
     "db:studio": "drizzle-kit studio",
     "test": "vitest run",
     "test:watch": "vitest",
-    "backup": "tsx scripts/backup.ts"
+    "backup": "tsx scripts/backup.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@fastify/cors": "^10.0.0",
@@ -33,6 +34,7 @@
     "zod": "^3.25.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22.10.5",
     "drizzle-kit": "^0.31.0",

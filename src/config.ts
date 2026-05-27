@@ -53,6 +53,9 @@ const envSchema = z.object({
   SIMILARITY_THRESHOLD: z.coerce.number().default(0.5),
   JWT_ACCESS_EXPIRY: z.string().default("15m"),
   JWT_REFRESH_EXPIRY: z.string().default("7d"),
+  LLM_PROVIDER: z.enum(["ollama", "deepseek"]).default("ollama"),
+  DEEPSEEK_API_KEY: z.string().default(""),
+  DEEPSEEK_MODEL: z.string().default("deepseek-chat"),
 });
 
 export const config = envSchema.parse(process.env);

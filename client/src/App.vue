@@ -23,6 +23,22 @@
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
+body.dark {
+  --color-bg: #1a1a2e;
+  --color-surface: #16213e;
+  --color-border: #2a2a4a;
+  --color-text: #e0e0e0;
+  --color-text-secondary: #999;
+  --color-primary: #818cf8;
+  --color-primary-hover: #6366f1;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+  body { font-size: 14px; }
+  button { padding: 6px 12px; font-size: 13px; }
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background: var(--color-bg);
