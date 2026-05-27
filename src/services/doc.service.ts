@@ -192,4 +192,42 @@ export async function deleteDocument(kbId: string, docId: string) {
   await db.delete(documents).where(eq(documents.id, docId));
 }
 
+export interface DocPreview {
+  text: string;
+  filename: string;
+  fileType: string;
+  totalChunks: number;
+  hasMore: boolean;
+}
+
+export async function getDocPreview(
+  docId: string,
+  offset = 0,
+  limit = 50,
+): Promise<DocPreview> {
+  const [doc] = await db.select().from(schema.documents).where(eq(schema.documents.id, docId)).limit(1);
+  if (!doc) throw new NotFoundError("Document", docId);
+  if (doc.status !== "ready") {
+    throw Object.assign(new Error("文档处理中，暂不可预览"), { statusCode: 400 });
+  }
+
+  const allChunks = await db
+    .select({ content: schema.chunks.content })
+    .from(schema.chunks)
+    .where(eq(schema.chunks.docId, docId))
+    .orderBy(schema.chunks.chunkIndex)
+    .offset(offset)
+    .limit(limit);
+
+  const totalChunks = doc.chunkCount || 0;
+
+  return {
+    text: allChunks.map((c) => c.content).join("\n\n"),
+    filename: doc.filename,
+    fileType: doc.fileType,
+    totalChunks,
+    hasMore: offset + limit < totalChunks,
+  };
+}
+
 export { documents as schema_documents } from "../db/schema.js";

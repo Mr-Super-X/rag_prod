@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { authenticate, requireKBAccess } from "../middleware/auth.js";
-import { processDocument, listDocuments, deleteDocument } from "../services/doc.service.js";
+import { processDocument, listDocuments, deleteDocument, getDocPreview } from "../services/doc.service.js";
 import { config } from "../config.js";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -62,6 +62,23 @@ export async function docRoutes(app: FastifyInstance) {
     const { id: kbId } = request.params as { id: string };
     const docs = await listDocuments(kbId);
     return { success: true, data: docs };
+  });
+
+  // 文档预览
+  app.get("/api/kb/:id/docs/:docId/preview", { preHandler: [requireKBAccess] }, async (request, reply) => {
+    const { docId } = request.params as { docId: string };
+    const offset = parseInt((request.query as Record<string, string>).offset || "0", 10);
+    const limit = Math.min(parseInt((request.query as Record<string, string>).limit || "50", 10), 200);
+    try {
+      const preview = await getDocPreview(docId, offset, limit);
+      return { success: true, data: preview };
+    } catch (err: unknown) {
+      const e = err as { statusCode?: number; message?: string };
+      if (e.statusCode === 400) {
+        return reply.status(400).send({ success: false, error: { code: "NOT_READY", message: e.message } });
+      }
+      throw err;
+    }
   });
 
   // 删除文档

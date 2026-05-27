@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { api } from "@/lib/api.js";
 import { useAsync } from "@/composables/useAsync.js";
 import type { Conversation } from "@/types.js";
@@ -9,22 +9,45 @@ const emit = defineEmits<{ select: [convId: string]; newChat: [] }>();
 
 const convs = useAsync<Conversation[]>();
 const loadingId = ref<string | null>(null);
+const searchKeyword = ref("");
 
 let pollTimer: ReturnType<typeof setInterval> | null = null;
 
 onMounted(() => {
   fetchConvs();
-  // 每 5 秒拉取一次对话列表
-  pollTimer = setInterval(() => fetchConvs(), 5000);
+  startPolling();
 });
 
 onUnmounted(() => {
   if (pollTimer) clearInterval(pollTimer);
 });
 
+// 搜索时暂停轮询
+watch(searchKeyword, (kw) => {
+  if (kw) {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  } else {
+    startPolling();
+  }
+});
+
 function fetchConvs() {
   convs.execute(() => api.get<Conversation[]>(`/kb/${props.kbId}/conversations`).then((r) => r.data));
 }
+
+function startPolling() {
+  if (pollTimer) return;
+  pollTimer = setInterval(() => fetchConvs(), 5000);
+}
+
+const filteredConvs = computed(() => {
+  if (!convs.data.value) return [];
+  const kw = searchKeyword.value.trim().toLowerCase();
+  if (!kw) return convs.data.value;
+  return convs.data.value.filter((c) =>
+    (c.title || "新对话").toLowerCase().includes(kw),
+  );
+});
 
 async function downloadExport(convId: string) {
   const rt = localStorage.getItem("refreshToken");
@@ -52,15 +75,9 @@ async function loadConv(convId: string) {
   try {
     const r = await api.get<Conversation>(`/conversations/${convId}`);
     emit("select", convId);
-    // 将消息传递给父组件
-    const conv = r.data;
-    if (conv.messages) {
-      // handled by parent via event + fetch
-    }
   } catch { /* ignore */ }
   loadingId.value = null;
 }
-
 </script>
 
 <template>
@@ -70,12 +87,21 @@ async function loadConv(convId: string) {
       <button class="btn-new" @click="emit('newChat')">+ 新对话</button>
     </div>
 
+    <input
+      v-model="searchKeyword"
+      class="search-input"
+      type="text"
+      placeholder="搜索对话..."
+    />
+
     <div v-if="convs.loading.value" class="state">加载中...</div>
-    <div v-else-if="!convs.data.value || convs.data.value.length === 0" class="state">暂无对话</div>
+    <div v-else-if="!filteredConvs || filteredConvs.length === 0" class="state">
+      {{ searchKeyword ? "无匹配对话" : "暂无对话" }}
+    </div>
 
     <div v-else class="list">
       <button
-        v-for="conv in convs.data.value"
+        v-for="conv in filteredConvs"
         :key="conv.id"
         class="conv-item"
         :class="{ active: loadingId === conv.id }"
@@ -97,6 +123,12 @@ async function loadConv(convId: string) {
 h4 { font-size: 15px; font-weight: 600; }
 .btn-new { font-size: 12px; padding: 4px 10px; background: var(--color-primary); color: #fff; }
 .btn-new:hover { background: var(--color-primary-hover); }
+.search-input {
+  width: 100%; padding: 6px 10px; font-size: 13px;
+  border: 1px solid var(--color-border); border-radius: var(--radius);
+  background: var(--color-bg);
+}
+.search-input:focus { border-color: var(--color-primary); outline: none; }
 .state { color: var(--color-text-secondary); font-size: 13px; padding: 16px 0; }
 .list { display: flex; flex-direction: column; gap: 4px; }
 .conv-item {

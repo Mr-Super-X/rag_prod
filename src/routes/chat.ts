@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { authenticate, requireKBAccess } from "../middleware/auth.js";
-import { ask, streamAsk } from "../services/chat.service.js";
+import { ask, streamAsk, buildContext, validateAndInjectCitations } from "../services/chat.service.js";
 import { streamGenerate } from "../pipeline/generator.js";
 import { addMessage } from "../services/context.service.js";
 import {
@@ -44,7 +44,7 @@ export async function chatRoutes(app: FastifyInstance) {
 
         let fullAnswer = "";
         for await (const token of streamGenerate(
-          result.sources.map((s, i) => `[${i + 1}] ${s.docFilename}\n${s.content}`).join("\n\n"),
+          buildContext(result.sources),
           result.rewrittenQuestion,
           result.historyForLLM as { role: "user" | "system" | "assistant"; content: string }[],
         )) {
@@ -52,11 +52,12 @@ export async function chatRoutes(app: FastifyInstance) {
           reply.raw.write(`data: ${JSON.stringify({ token })}\n\n`);
         }
 
-        await addMessage(result.convId, "assistant", fullAnswer, result.sources);
-        reply.raw.write(`data: ${JSON.stringify({ done: true, conversationId: result.convId, sources: result.sources })}\n\n`);
+        const finalAnswer = validateAndInjectCitations(fullAnswer, result.sources);
+        await addMessage(result.convId, "assistant", finalAnswer, result.sources);
+        reply.raw.write(`data: ${JSON.stringify({ done: true, conversationId: result.convId, sources: result.sources, answer: finalAnswer })}\n\n`);
       } catch (err: unknown) {
         const e = err as { type?: string; message?: string; conversationId?: string };
-        if (e.type === "fallback") {
+        if (e.type === "agent") {
           reply.raw.write(`data: ${JSON.stringify({ done: true, agent: true, answer: e.message, conversationId: e.conversationId, sources: [] })}\n\n`);
         } else if (e.type === "fallback") {
           reply.raw.write(`data: ${JSON.stringify({ done: true, fallback: true, answer: e.message, conversationId: e.conversationId, sources: [] })}\n\n`);

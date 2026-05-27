@@ -11,6 +11,61 @@ import {
 } from "./context.service.js";
 import type { ChatRequest, ChatResponse, ChunkSource } from "../types.js";
 
+export function buildContext(sources: ChunkSource[]): string {
+  return sources
+    .map((s, i) => `[${i + 1}] ${s.docFilename}\n${s.content}`)
+    .join("\n\n");
+}
+
+export function validateAndInjectCitations(answer: string, sources: ChunkSource[]): string {
+  if (sources.length === 0) return answer;
+
+  const citationRegex = /\[(\d{1,2})\]/g;
+  const hasCitations = citationRegex.test(answer);
+  citationRegex.lastIndex = 0;
+
+  if (hasCitations) {
+    // 验证并剥离无效引用
+    return answer.replace(/\[(\d{1,2})\]/g, (_match, num) => {
+      const n = parseInt(num, 10);
+      return n >= 1 && n <= sources.length ? _match : "";
+    });
+  }
+
+  // 兜底：bigram 重叠注入
+  const sentences = answer.split(/(?<=[。！？\n])/);
+  const result: string[] = [];
+  for (const sentence of sentences) {
+    result.push(sentence);
+    if (sentence.trim().length < 6) continue;
+
+    // 构建句子的 bigram 集合
+    const sentenceBigrams = new Set<string>();
+    for (let i = 0; i < sentence.length - 1; i++) {
+      sentenceBigrams.add(sentence.substring(i, i + 2));
+    }
+    if (sentenceBigrams.size === 0) continue;
+
+    let bestIdx = -1;
+    let bestOverlap = 0;
+    for (let i = 0; i < sources.length; i++) {
+      const sourceText = sources[i].content.slice(0, 800);
+      let overlap = 0;
+      for (let j = 0; j < sourceText.length - 1; j++) {
+        if (sentenceBigrams.has(sourceText.substring(j, j + 2))) overlap++;
+      }
+      if (overlap > bestOverlap && overlap >= 3) {
+        bestOverlap = overlap;
+        bestIdx = i;
+      }
+    }
+    if (bestIdx >= 0) {
+      result.push(`[${bestIdx + 1}]`);
+    }
+  }
+  return result.join("");
+}
+
 export async function ask(
   kbId: string,
   request: ChatRequest,
@@ -58,16 +113,17 @@ export async function ask(
   }
 
   // 构建上下文
-  const context = sources
-    .map((s, i) => `[文档片段 ${i + 1}] (来源: ${s.docFilename})\n${s.content}`)
-    .join("\n\n");
+  const context = buildContext(sources);
 
   // 生成
   const historyForLLM = history.map((m) => ({
     role: m.role as "user" | "assistant",
     content: m.content,
   }));
-  const answer = await generate(context, rewrittenQuestion, historyForLLM);
+  const rawAnswer = await generate(context, rewrittenQuestion, historyForLLM);
+
+  // 引用后处理
+  const answer = validateAndInjectCitations(rawAnswer, sources);
 
   // 保存回答
   await addMessage(convId, "assistant", answer, sources);
@@ -120,11 +176,6 @@ export async function streamAsk(
     await addMessage(convId, "assistant", fallback, []);
     throw { type: "fallback", message: fallback, conversationId: convId };
   }
-
-  // 构建上下文
-  const context = sources
-    .map((s, i) => `[文档片段 ${i + 1}] (来源: ${s.docFilename})\n${s.content}`)
-    .join("\n\n");
 
   const historyForLLM = history.map((m) => ({
     role: m.role as "user" | "assistant",

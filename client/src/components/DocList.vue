@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import { api } from "@/lib/api.js";
 import { useAsync } from "@/composables/useAsync.js";
+import DocPreviewModal from "./DocPreviewModal.vue";
 import type { Document } from "@/types.js";
 
 const props = defineProps<{ kbId: string }>();
@@ -9,6 +10,7 @@ const props = defineProps<{ kbId: string }>();
 const docs = useAsync<Document[]>();
 let pollTimer: ReturnType<typeof setInterval> | null = null;
 const hasProcessing = ref(false);
+const previewDocId = ref("");
 
 onMounted(() => {
   fetchDocs();
@@ -45,6 +47,10 @@ async function handleDelete(docId: string) {
   } catch { /* ignore */ }
 }
 
+function openPreview(docId: string) {
+  previewDocId.value = docId;
+}
+
 function statusLabel(s: string): string {
   return { queued: "排队中", processing: "处理中", ready: "就绪", error: "失败" }[s] || s;
 }
@@ -65,9 +71,17 @@ function statusLabel(s: string): string {
         <span class="doc-status" :class="doc.status">{{ statusLabel(doc.status) }}</span>
         <span class="doc-chunks" v-if="doc.status === 'ready'">{{ doc.chunkCount }} 块</span>
         <span class="doc-error" v-if="doc.status === 'error'">{{ doc.errorMessage }}</span>
+        <button v-if="doc.status === 'ready'" class="btn-preview" @click="openPreview(doc.id)">预览</button>
         <button class="btn-del" @click="handleDelete(doc.id)">删除</button>
       </div>
     </div>
+
+    <DocPreviewModal
+      v-if="previewDocId"
+      :kb-id="kbId"
+      :doc-id="previewDocId"
+      @close="previewDocId = ''"
+    />
   </div>
 </template>
 
@@ -82,7 +96,13 @@ h4 { font-size: 15px; font-weight: 600; }
   padding: 10px 12px; background: var(--color-bg); border-radius: var(--radius);
   font-size: 13px;
 }
-.doc-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.doc-name {
+  flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.btn-preview {
+  background: transparent; color: var(--color-primary); font-size: 12px; padding: 4px 8px;
+}
+.btn-preview:hover { background: #eef2ff; }
 .doc-type { color: var(--color-text-secondary); font-size: 11px; text-transform: uppercase; }
 .doc-status { font-size: 12px; padding: 2px 8px; border-radius: 10px; }
 .doc-status.processing { background: #fef3c7; color: #92400e; }

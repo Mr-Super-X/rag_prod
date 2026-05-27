@@ -86,10 +86,11 @@ async function send() {
       thinking.value = "";
       convId.value = result.conversationId;
       assistantMsg.sources = result.sources as ChunkSource[];
-      if (result.agent) {
+      if (result.answer) {
+        assistantMsg.content = result.answer;
+      } else if (result.agent) {
         assistantMsg.content = result.answer || "";
-      }
-      if (result.fallback) {
+      } else if (result.fallback) {
         assistantMsg.content = result.answer || "";
       }
       loading.value = false;
