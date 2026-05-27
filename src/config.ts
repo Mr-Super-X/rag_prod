@@ -49,6 +49,7 @@ const envSchema = z.object({
   FINAL_TOP_K: z.coerce.number().default(10),
   RERANKER_TOP_K: z.coerce.number().default(25),
   RERANKER_ENABLED: z.coerce.boolean().default(false),
+  INCREMENTAL_INDEX: z.coerce.boolean().default(false),
   SIMILARITY_THRESHOLD: z.coerce.number().default(0.5),
   JWT_ACCESS_EXPIRY: z.string().default("15m"),
   JWT_REFRESH_EXPIRY: z.string().default("7d"),

@@ -11,16 +11,10 @@ import { kbRoutes } from "./routes/kb.js";
 import { docRoutes } from "./routes/doc.js";
 import { chatRoutes } from "./routes/chat.js";
 import { redis } from "./lib/redis.js";
+import { loggerConfig } from "./lib/logger.js";
 
 export async function buildApp() {
-  const app = Fastify({
-    logger: {
-      transport: {
-        target: "pino-pretty",
-        options: { colorize: true },
-      },
-    },
-  });
+  const app = Fastify({ logger: loggerConfig });
 
   // Error handler
   app.setErrorHandler(errorHandler);

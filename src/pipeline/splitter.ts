@@ -1,9 +1,15 @@
+import { createHash } from "node:crypto";
 import { config } from "../config.js";
 
 export interface TextChunk {
   content: string;
+  contentHash: string;
   index: number;
   metadata: Record<string, unknown>;
+}
+
+function sha256(text: string): string {
+  return createHash("sha256").update(text).digest("hex");
 }
 
 export function splitText(text: string, metadata: Record<string, unknown> = {}): TextChunk[] {
@@ -20,7 +26,8 @@ export function splitText(text: string, metadata: Record<string, unknown> = {}):
     if (!trimmed) continue;
 
     if (currentChunk.length + trimmed.length > CHUNK_SIZE && currentChunk.length > 0) {
-      chunks.push({ content: currentChunk.trim(), index, metadata });
+      const content = currentChunk.trim();
+      chunks.push({ content, contentHash: sha256(content), index, metadata });
       index++;
       // 重叠：保留上一段的最后部分
       const overlap = currentChunk.slice(-CHUNK_OVERLAP);
@@ -31,7 +38,8 @@ export function splitText(text: string, metadata: Record<string, unknown> = {}):
   }
 
   if (currentChunk.trim()) {
-    chunks.push({ content: currentChunk.trim(), index, metadata });
+    const content = currentChunk.trim();
+    chunks.push({ content, contentHash: sha256(content), index, metadata });
   }
 
   return chunks;

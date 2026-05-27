@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { db, schema } from "../db/index.js";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { config } from "../config.js";
 import { parseFile } from "../pipeline/parser.js";
 import { splitText } from "../pipeline/splitter.js";
@@ -61,13 +61,68 @@ async function processDocumentAsync(
       return;
     }
 
-    // Embedding
-    const texts = textChunks.map((c) => c.content);
-    const vectors = await embed(texts);
+    // 增量索引：比对已有 chunk 的 hash，只处理变化的部分
+    let chunksToEmbed = textChunks;
+    let staleIds: string[] = [];
 
-    // 构建向量数据
-    const ids = textChunks.map((_, i) => `${docId}_${i}`);
-    const payloads = textChunks.map((chunk, i) => ({
+    if (config.INCREMENTAL_INDEX) {
+      const oldChunks = await db.select().from(chunks).where(eq(chunks.kbId, kbId));
+
+      if (oldChunks.length > 0) {
+        // 构建旧 chunk 的 hash 映射（来自 metadata）
+        const oldHashSet = new Map<string, string>(); // hash → chunkId
+        for (const oc of oldChunks) {
+          const h = (oc.metadata as Record<string, unknown>)?.contentHash as string;
+          if (h) oldHashSet.set(h, oc.id);
+        }
+
+        // 比对：新的 hash 在旧集合中 → 复用；不在 → 需要 embedding
+        const newHashes = new Set(textChunks.map((c) => c.contentHash));
+        const reusedIds = new Set<string>();
+
+        for (const [hash, chunkId] of oldHashSet) {
+          if (newHashes.has(hash)) {
+            reusedIds.add(chunkId);
+          }
+        }
+
+        // 不在新集合中的旧 chunk 标记为删除
+        for (const oc of oldChunks) {
+          const h = (oc.metadata as Record<string, unknown>)?.contentHash as string;
+          if (h && !newHashes.has(h)) {
+            staleIds.push(`${docId}_${oc.chunkIndex}`);
+          }
+        }
+
+        // 只对新 chunk 做 embedding
+        chunksToEmbed = textChunks.filter((c) => !oldHashSet.has(c.contentHash));
+
+        // 复用未变化的 chunk：更新 PG 记录指向新 docId
+        for (const oc of oldChunks) {
+          const h = (oc.metadata as Record<string, unknown>)?.contentHash as string;
+          if (h && reusedIds.has(oc.id)) {
+            await db.update(chunks).set({
+              docId,
+              chunkIndex: textChunks.findIndex((tc) => tc.contentHash === h),
+              metadata: { ...(oc.metadata as Record<string, unknown>), contentHash: h },
+            }).where(eq(chunks.id, oc.id));
+          }
+        }
+
+        // 删除失效的向量
+        if (staleIds.length > 0) {
+          await deleteVectors(kbId, staleIds);
+        }
+      }
+    }
+
+    // Embedding（只对新 chunk）
+    const texts = chunksToEmbed.map((c) => c.content);
+    const vectors = texts.length > 0 ? await embed(texts) : [];
+
+    // 构建向量数据（只对新 chunk）
+    const ids = chunksToEmbed.map((_, i) => `${docId}_${i}`);
+    const payloads = chunksToEmbed.map((chunk, i) => ({
       chunkId: `${docId}_${i}`,
       docId,
       kbId,
@@ -77,23 +132,25 @@ async function processDocumentAsync(
     }));
 
     // 写入 LanceDB
-    await insertVectors(kbId, vectors, ids, payloads);
+    if (vectors.length > 0) {
+      await insertVectors(kbId, vectors, ids, payloads);
+    }
 
-    // 写入 PG chunks 表
-    for (let i = 0; i < textChunks.length; i++) {
+    // 写入 PG chunks 表 + BM25（只对新 chunk）
+    for (let i = 0; i < chunksToEmbed.length; i++) {
       await db.insert(chunks).values({
         docId,
         kbId,
         qdrantPointId: `lance_${docId}_${i}`,
-        content: textChunks[i].content,
+        content: chunksToEmbed[i].content,
         chunkIndex: i,
-        metadata: textChunks[i].metadata,
+        metadata: { contentHash: chunksToEmbed[i].contentHash },
       });
     }
 
-    // 写入 BM25 索引
-    for (let i = 0; i < textChunks.length; i++) {
-      await indexBM25(kbId, `${docId}_${i}`, textChunks[i].content);
+    // 写入 BM25 索引（只对新 chunk）
+    for (let i = 0; i < chunksToEmbed.length; i++) {
+      await indexBM25(kbId, `${docId}_${i}`, chunksToEmbed[i].content);
     }
 
     await db
