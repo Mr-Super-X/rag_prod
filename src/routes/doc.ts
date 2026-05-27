@@ -26,11 +26,19 @@ export async function docRoutes(app: FastifyInstance) {
       });
     }
 
+    // 读取文件 + 大小校验
+    const buffer = await file.toBuffer();
+    if (buffer.length > config.MAX_FILE_SIZE_MB * 1024 * 1024) {
+      return reply.status(413).send({
+        success: false,
+        error: { code: "FILE_TOO_LARGE", message: `File exceeds ${config.MAX_FILE_SIZE_MB}MB limit` },
+      });
+    }
+
     // 保存文件
     const uploadDir = path.resolve(config.UPLOAD_DIR);
     await fs.mkdir(uploadDir, { recursive: true });
     const destPath = path.join(uploadDir, `${Date.now()}_${file.filename}`);
-    const buffer = await file.toBuffer();
     await fs.writeFile(destPath, buffer);
 
     // 创建记录 + 立即返回，后台异步处理
@@ -57,7 +65,7 @@ export async function docRoutes(app: FastifyInstance) {
   });
 
   // 删除文档
-  app.delete("/api/kb/:id/docs/:docId", async (request, reply) => {
+  app.delete("/api/kb/:id/docs/:docId", { preHandler: [requireKBAccess] }, async (request, reply) => {
     const { id: kbId, docId } = request.params as { id: string; docId: string };
     await deleteDocument(kbId, docId);
     return reply.status(204).send();

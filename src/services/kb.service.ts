@@ -1,5 +1,5 @@
 import { db, schema } from "../db/index.js";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { NotFoundError, ForbiddenError } from "../lib/errors.js";
 import { dropTable } from "../lib/vectordb.js";
 
@@ -11,7 +11,17 @@ export interface CreateKBInput {
 }
 
 export async function listKBs(userId: string) {
-  return db.select().from(knowledgeBases).where(eq(knowledgeBases.createdBy, userId));
+  // 自己创建的 KB
+  const owned = await db.select().from(knowledgeBases).where(eq(knowledgeBases.createdBy, userId));
+  // 作为成员的 KB
+  const memberRecords = await db.select({ kbId: kbMembers.kbId }).from(kbMembers).where(eq(kbMembers.userId, userId));
+  if (memberRecords.length === 0) return owned;
+
+  const memberKbIds = memberRecords.map((m) => m.kbId);
+  const memberKbs = await db.select().from(knowledgeBases).where(
+    inArray(knowledgeBases.id, memberKbIds)
+  );
+  return [...owned, ...memberKbs];
 }
 
 export async function createKB(input: CreateKBInput, userId: string) {

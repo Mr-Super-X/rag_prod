@@ -8,13 +8,14 @@ import ChatPanel from "@/components/ChatPanel.vue";
 import DocUploader from "@/components/DocUploader.vue";
 import DocList from "@/components/DocList.vue";
 import ConversationList from "@/components/ConversationList.vue";
+import MemberManager from "@/components/MemberManager.vue";
 import type { KnowledgeBase, Conversation, Message, ApiResponse } from "@/types.js";
 
 const route = useRoute();
 const kbId = computed(() => route.params.id as string);
 
 const kb = useAsync<KnowledgeBase>();
-const tab = ref<"chat" | "docs">("chat");
+const tab = ref<"chat" | "docs" | "members">("chat");
 
 onMounted(() => {
   kb.execute(() => api.get<KnowledgeBase>(`/kb/${kbId.value}`).then((r) => r.data));
@@ -45,6 +46,7 @@ function onUploaded() {
       <div class="tabs">
         <button :class="{ active: tab === 'chat' }" @click="tab = 'chat'">问答</button>
         <button :class="{ active: tab === 'docs' }" @click="tab = 'docs'">文档管理</button>
+        <button :class="{ active: tab === 'members' }" @click="tab = 'members'">成员</button>
       </div>
 
       <!-- Tab Content -->
@@ -55,6 +57,10 @@ function onUploaded() {
         <aside class="chat-sidebar">
           <ConversationList :kb-id="kbId" />
         </aside>
+      </div>
+
+      <div v-else-if="tab === 'members'" class="tab-content">
+        <MemberManager :kb-id="kbId" />
       </div>
 
       <div v-else class="tab-content">

@@ -72,8 +72,8 @@ export async function chatRoutes(app: FastifyInstance) {
     return { success: true, data: result };
   });
 
-  // 对话列表
-  app.get("/api/kb/:id/conversations", async (request) => {
+  // 对话列表（需 KB 访问权限）
+  app.get("/api/kb/:id/conversations", { preHandler: [requireKBAccess] }, async (request) => {
     const convs = await listConversations(request.user!.id);
     return { success: true, data: convs };
   });
@@ -86,9 +86,10 @@ export async function chatRoutes(app: FastifyInstance) {
     return { success: true, data: { ...conv, messages: msgs } };
   });
 
-  // 删除对话
+  // 删除对话（仅自己的对话）
   app.delete("/api/conversations/:id", async (request, reply) => {
     const { id } = request.params as { id: string };
+    await getConversation(id, request.user!.id); // 校验归属
     await deleteConversation(id);
     return reply.status(204).send();
   });

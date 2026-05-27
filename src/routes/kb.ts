@@ -1,5 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { authenticate, requireKBAccess } from "../middleware/auth.js";
+import { db, schema } from "../db/index.js";
+import { eq, and } from "drizzle-orm";
 import {
   listKBs,
   createKB,
@@ -54,6 +56,45 @@ export async function kbRoutes(app: FastifyInstance) {
   app.delete("/api/kb/:id", { preHandler: [requireKBAccess] }, async (request, reply) => {
     const { id } = request.params as { id: string };
     await deleteKB(id, request.user!.id, request.user!.role);
+    return reply.status(204).send();
+  });
+
+  // 成员列表
+  app.get("/api/kb/:id/members", { preHandler: [requireKBAccess] }, async (request) => {
+    const { id: kbId } = request.params as { id: string };
+    const members = await db.select({
+      id: schema.kbMembers.id,
+      userId: schema.kbMembers.userId,
+      username: schema.users.username,
+      role: schema.kbMembers.role,
+    }).from(schema.kbMembers)
+      .innerJoin(schema.users, eq(schema.kbMembers.userId, schema.users.id))
+      .where(eq(schema.kbMembers.kbId, kbId));
+    return { success: true, data: members };
+  });
+
+  // 添加成员
+  app.post("/api/kb/:id/members", { preHandler: [requireKBAccess] }, async (request, reply) => {
+    const { id: kbId } = request.params as { id: string };
+    const { username } = request.body as { username: string };
+    const [user] = await db.select().from(schema.users).where(eq(schema.users.username, username)).limit(1);
+    if (!user) return reply.status(404).send({ success: false, error: { code: "NOT_FOUND", message: "User not found" } });
+
+    const [existing] = await db.select().from(schema.kbMembers).where(
+      and(eq(schema.kbMembers.kbId, kbId), eq(schema.kbMembers.userId, user.id))
+    ).limit(1);
+    if (existing) return reply.status(409).send({ success: false, error: { code: "ALREADY_MEMBER", message: "Already a member" } });
+
+    await db.insert(schema.kbMembers).values({ kbId, userId: user.id, role: "member" });
+    return reply.status(201).send({ success: true, data: { userId: user.id, username, role: "member" } });
+  });
+
+  // 移除成员
+  app.delete("/api/kb/:id/members/:userId", { preHandler: [requireKBAccess] }, async (request, reply) => {
+    const { id: kbId, userId } = request.params as { id: string; userId: string };
+    await db.delete(schema.kbMembers).where(
+      and(eq(schema.kbMembers.kbId, kbId), eq(schema.kbMembers.userId, userId), eq(schema.kbMembers.role, "member"))
+    );
     return reply.status(204).send();
   });
 }
