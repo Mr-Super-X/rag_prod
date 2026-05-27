@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { NotFoundError, ForbiddenError } from "../lib/errors.js";
 import { dropTable } from "../lib/vectordb.js";
 
-const { knowledgeBases } = schema;
+const { knowledgeBases, kbMembers } = schema;
 
 export interface CreateKBInput {
   name: string;
@@ -19,6 +19,8 @@ export async function createKB(input: CreateKBInput, userId: string) {
     .insert(knowledgeBases)
     .values({ ...input, createdBy: userId })
     .returning();
+  // 创建者自动成为 owner 成员
+  await db.insert(kbMembers).values({ kbId: kb.id, userId, role: "owner" });
   return kb;
 }
 

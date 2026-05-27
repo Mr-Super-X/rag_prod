@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import fjwt from "@fastify/jwt";
 import fcors from "@fastify/cors";
 import fmultipart from "@fastify/multipart";
+import fratlimit from "@fastify/rate-limit";
 import fswagger from "@fastify/swagger";
 import fswaggerUi from "@fastify/swagger-ui";
 import { config } from "./config.js";
@@ -23,6 +24,7 @@ export async function buildApp() {
   await app.register(fcors, { origin: true });
   await app.register(fjwt, { secret: config.JWT_SECRET });
   await app.register(fmultipart, { limits: { fileSize: config.MAX_FILE_SIZE_MB * 1024 * 1024 } });
+  await app.register(fratlimit, { max: 60, timeWindow: "1 minute" });
   await app.register(fswagger, {
     openapi: {
       info: { title: "RAG Enterprise API", version: "0.1.0" },

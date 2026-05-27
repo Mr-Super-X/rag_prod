@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { authenticate } from "../middleware/auth.js";
+import { authenticate, requireKBAccess } from "../middleware/auth.js";
 import { processDocument, listDocuments, deleteDocument } from "../services/doc.service.js";
 import { config } from "../config.js";
 import fs from "node:fs/promises";
@@ -9,7 +9,7 @@ export async function docRoutes(app: FastifyInstance) {
   app.addHook("onRequest", authenticate);
 
   // 上传文档
-  app.post("/api/kb/:id/docs", async (request, reply) => {
+  app.post("/api/kb/:id/docs", { preHandler: [requireKBAccess] }, async (request, reply) => {
     const { id: kbId } = request.params as { id: string };
     const file = await request.file();
 
@@ -50,7 +50,7 @@ export async function docRoutes(app: FastifyInstance) {
   });
 
   // 文档列表
-  app.get("/api/kb/:id/docs", async (request) => {
+  app.get("/api/kb/:id/docs", { preHandler: [requireKBAccess] }, async (request) => {
     const { id: kbId } = request.params as { id: string };
     const docs = await listDocuments(kbId);
     return { success: true, data: docs };

@@ -13,6 +13,9 @@ data/
 logs/
 backups/
 
+# Docker 离线导出（大文件，不提交）
+exports/
+
 # OMC 状态文件
 .omc/
 

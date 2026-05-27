@@ -15,6 +15,13 @@
       "when": 1779793219446,
       "tag": "0001_useful_toad_men",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779846359002,
+      "tag": "0002_noisy_menace",
+      "breakpoints": true
     }
   ]
 }

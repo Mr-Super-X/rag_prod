@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { authenticate } from "../middleware/auth.js";
+import { authenticate, requireKBAccess } from "../middleware/auth.js";
 import { ask, streamAsk } from "../services/chat.service.js";
 import { streamGenerate } from "../pipeline/generator.js";
 import { addMessage } from "../services/context.service.js";
@@ -24,7 +24,7 @@ export async function chatRoutes(app: FastifyInstance) {
   app.addHook("onRequest", authenticate);
 
   // 问答（非流式，V1 兼容）
-  app.post("/api/kb/:id/chat", { schema: { body: chatBody } }, async (request, reply) => {
+  app.post("/api/kb/:id/chat", { schema: { body: chatBody }, preHandler: [requireKBAccess] }, async (request, reply) => {
     const { id: kbId } = request.params as { id: string };
     const body = request.body as ChatRequest;
 

@@ -108,6 +108,70 @@ docker pull hello-world
 
 能拉下来说明配置生效。改完配置后需要点 **Apply & Restart**，等 Docker 图标变绿再操作。
 
+## 无网络环境：离线导入镜像与模型
+
+如果在没有 VPN 的机器上运行，可以用另一台已拉取好镜像和模型的机器导出，再离线导入目标机器。
+
+> 项目 `exports/` 目录已包含预导出的镜像和模型文件，可直接拷贝使用。
+
+### 导出（有网络的机器）
+
+```bash
+# 创建导出目录
+mkdir -p exports
+
+# 导出 Docker 镜像（约 4.2GB）
+docker save postgres:15-alpine -o exports/postgres-15-alpine.tar      # ~95MB
+docker save redis:7-alpine -o exports/redis-7-alpine.tar              # ~17MB
+docker save ollama/ollama:latest -o exports/ollama-latest.tar         # ~4GB
+
+# 导出已拉取的模型（约 5.7GB）
+docker run --rm -v rag_prod_ollamadata:/data -v $(pwd)/exports:/backup alpine \
+  tar czf /backup/ollama-models.tar.gz -C /data .
+```
+
+> **Windows PowerShell 用户**：将 `$(pwd)` 替换为当前目录绝对路径。
+> 
+> 如果 Docker 卷名不同（`docker volume ls | grep ollama` 查看），替换 `rag_prod_ollamadata`。
+
+### 导入（目标机器）
+
+```bash
+# 1. 将 exports/ 整个目录拷贝到目标机器（U 盘 / 移动硬盘 / 局域网 scp）
+
+# 2. 导入 Docker 镜像
+docker load -i exports/postgres-15-alpine.tar
+docker load -i exports/redis-7-alpine.tar
+docker load -i exports/ollama-latest.tar
+
+# 3. 验证镜像已导入
+docker images | grep -E "postgres|redis|ollama"
+```
+
+```bash
+# 4. 先启动一次 Ollama 让它创建数据卷
+docker-compose up -d ollama
+
+# 5. 停止 Ollama 并导入模型文件
+docker-compose stop ollama
+docker run --rm -v rag_prod_ollamadata:/data -v $(pwd)/exports:/backup alpine \
+  tar xzf /backup/ollama-models.tar.gz -C /data
+
+# 6. 重新启动 Ollama
+docker-compose start ollama
+
+# 7. 验证模型可用
+curl http://localhost:11434/api/tags
+# 应返回 qwen2.5:7b 和 bge-m3
+```
+
+```bash
+# 8. 启动全部服务
+docker-compose up -d
+```
+
+> 镜像和模型都已本地存在，`docker-compose up -d` 不会再触发拉取。
+
 ## 快速启动
 
 ### 平台选择

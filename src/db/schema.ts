@@ -32,6 +32,25 @@ export const knowledgeBases = pgTable(
   },
 );
 
+export const kbMembers = pgTable(
+  "kb_members",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    kbId: uuid("kb_id")
+      .notNull()
+      .references(() => knowledgeBases.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: varchar("role", { length: 20 }).notNull().default("member"), // "owner" | "member"
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("idx_kb_members_kb_id").on(t.kbId),
+    index("idx_kb_members_user_id").on(t.userId),
+  ],
+);
+
 export const documents = pgTable(
   "documents",
   {

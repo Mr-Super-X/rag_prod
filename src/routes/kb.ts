@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { authenticate } from "../middleware/auth.js";
+import { authenticate, requireKBAccess } from "../middleware/auth.js";
 import {
   listKBs,
   createKB,
@@ -38,20 +38,20 @@ export async function kbRoutes(app: FastifyInstance) {
     return reply.status(201).send({ success: true, data: kb });
   });
 
-  app.get("/api/kb/:id", async (request) => {
+  app.get("/api/kb/:id", { preHandler: [requireKBAccess] }, async (request) => {
     const { id } = request.params as { id: string };
     const kb = await getKB(id);
     return { success: true, data: kb };
   });
 
-  app.patch("/api/kb/:id", { schema: { body: kbPatchBody } }, async (request) => {
+  app.patch("/api/kb/:id", { schema: { body: kbPatchBody }, preHandler: [requireKBAccess] }, async (request) => {
     const { id } = request.params as { id: string };
     const input = request.body as { name?: string; description?: string };
     const kb = await updateKB(id, input, request.user!.id);
     return { success: true, data: kb };
   });
 
-  app.delete("/api/kb/:id", async (request, reply) => {
+  app.delete("/api/kb/:id", { preHandler: [requireKBAccess] }, async (request, reply) => {
     const { id } = request.params as { id: string };
     await deleteKB(id, request.user!.id, request.user!.role);
     return reply.status(204).send();

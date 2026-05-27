@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { api } from "@/lib/api.js";
 import { useAsync } from "@/composables/useAsync.js";
 import type { Document } from "@/types.js";
@@ -7,11 +7,35 @@ import type { Document } from "@/types.js";
 const props = defineProps<{ kbId: string }>();
 
 const docs = useAsync<Document[]>();
+let pollTimer: ReturnType<typeof setInterval> | null = null;
+const hasProcessing = ref(false);
 
-onMounted(() => fetchDocs());
+onMounted(() => {
+  fetchDocs();
+  startPolling();
+});
+
+onUnmounted(() => {
+  if (pollTimer) clearInterval(pollTimer);
+});
 
 function fetchDocs() {
-  docs.execute(() => api.get<Document[]>("/kb/" + props.kbId + "/docs").then((r) => r.data));
+  docs.execute(() => api.get<Document[]>("/kb/" + props.kbId + "/docs").then((r) => {
+    hasProcessing.value = r.data.some((d) => d.status === "processing" || d.status === "queued");
+    if (hasProcessing.value) startPolling();
+    return r.data;
+  }));
+}
+
+function startPolling() {
+  if (pollTimer) return;
+  pollTimer = setInterval(() => {
+    if (!hasProcessing.value) {
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+      return;
+    }
+    fetchDocs();
+  }, 3000);
 }
 
 async function handleDelete(docId: string) {

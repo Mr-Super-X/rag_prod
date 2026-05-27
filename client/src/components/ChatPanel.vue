@@ -15,6 +15,7 @@ interface ChatResult {
 const messages = ref<Message[]>([]);
 const question = ref("");
 const loading = ref(false);
+const thinking = ref("");
 const error = ref("");
 const convId = ref<string | null>(null);
 const messagesEl = ref<HTMLElement | null>(null);
@@ -34,6 +35,7 @@ async function send() {
 
   question.value = "";
   loading.value = true;
+  thinking.value = "检索中...";
   error.value = "";
 
   messages.value.push({
@@ -62,10 +64,12 @@ async function send() {
     q,
     convId.value || undefined,
     (token) => {
+      if (thinking.value) { thinking.value = ""; }
       assistantMsg.content += token;
       scrollDown();
     },
     (result) => {
+      thinking.value = "";
       convId.value = result.conversationId;
       assistantMsg.sources = result.sources as ChunkSource[];
       if (result.fallback) {
@@ -74,6 +78,7 @@ async function send() {
       loading.value = false;
     },
     (err) => {
+      thinking.value = "";
       error.value = err.message || "问答失败";
       loading.value = false;
     },
@@ -104,6 +109,9 @@ async function scrollDown() {
         :created-at="msg.createdAt"
       />
 
+      <div v-if="thinking" class="thinking">
+        <span class="dot"></span> {{ thinking }}
+      </div>
       <div v-if="error" class="error-msg">{{ error }}</div>
     </div>
 
@@ -133,6 +141,9 @@ async function scrollDown() {
 }
 .empty-hint { text-align: center; padding: 60px 20px; color: var(--color-text-secondary); font-size: 14px; }
 .typing { font-size: 13px; color: var(--color-text-secondary); padding: 8px 0; }
+.thinking { font-size: 13px; color: var(--color-primary); padding: 8px 0; display: flex; align-items: center; gap: 6px; }
+.dot { width: 6px; height: 6px; background: var(--color-primary); border-radius: 50%; animation: pulse 1s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
 .error-msg { background: #fef2f2; color: var(--color-danger); padding: 8px 12px; border-radius: var(--radius); font-size: 13px; margin: 8px 0; }
 .input-row {
   display: flex; gap: 8px; padding: 12px 16px;
