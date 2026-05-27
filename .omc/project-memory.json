@@ -256,8 +256,14 @@
     },
     {
       "path": "src\\routes\\chat.ts",
-      "accessCount": 35,
-      "lastAccessed": 1779875790968,
+      "accessCount": 36,
+      "lastAccessed": 1779876320742,
+      "type": "file"
+    },
+    {
+      "path": "src\\middleware\\auth.ts",
+      "accessCount": 27,
+      "lastAccessed": 1779876828288,
       "type": "file"
     },
     {
@@ -267,15 +273,9 @@
       "type": "file"
     },
     {
-      "path": "src\\middleware\\auth.ts",
-      "accessCount": 25,
-      "lastAccessed": 1779874761345,
-      "type": "file"
-    },
-    {
       "path": "src\\db\\schema.ts",
-      "accessCount": 22,
-      "lastAccessed": 1779874760200,
+      "accessCount": 24,
+      "lastAccessed": 1779876826889,
       "type": "file"
     },
     {
@@ -286,8 +286,8 @@
     },
     {
       "path": "src\\routes\\doc.ts",
-      "accessCount": 20,
-      "lastAccessed": 1779874769082,
+      "accessCount": 21,
+      "lastAccessed": 1779876363437,
       "type": "file"
     },
     {
@@ -297,39 +297,39 @@
       "type": "file"
     },
     {
+      "path": "src\\services\\chat.service.ts",
+      "accessCount": 19,
+      "lastAccessed": 1779876327218,
+      "type": "file"
+    },
+    {
+      "path": "src\\config.ts",
+      "accessCount": 19,
+      "lastAccessed": 1779876828007,
+      "type": "file"
+    },
+    {
       "path": "docs\\AGENTS.md",
       "accessCount": 18,
       "lastAccessed": 1779869984134,
       "type": "file"
     },
     {
-      "path": "src\\services\\chat.service.ts",
-      "accessCount": 18,
-      "lastAccessed": 1779874778448,
-      "type": "file"
-    },
-    {
-      "path": "src\\config.ts",
-      "accessCount": 17,
-      "lastAccessed": 1779874759339,
-      "type": "file"
-    },
-    {
       "path": "src\\app.ts",
-      "accessCount": 17,
-      "lastAccessed": 1779874767407,
+      "accessCount": 18,
+      "lastAccessed": 1779876315324,
+      "type": "file"
+    },
+    {
+      "path": "src\\pipeline\\parser.ts",
+      "accessCount": 13,
+      "lastAccessed": 1779876844064,
       "type": "file"
     },
     {
       "path": "src\\pipeline\\generator.ts",
       "accessCount": 11,
       "lastAccessed": 1779874781654,
-      "type": "file"
-    },
-    {
-      "path": "src\\pipeline\\parser.ts",
-      "accessCount": 10,
-      "lastAccessed": 1779874781546,
       "type": "file"
     },
     {
@@ -358,20 +358,20 @@
     },
     {
       "path": "src\\services\\retrieval.service.ts",
+      "accessCount": 8,
+      "lastAccessed": 1779876326407,
+      "type": "file"
+    },
+    {
+      "path": "client\\src\\router\\index.ts",
       "accessCount": 7,
-      "lastAccessed": 1779874790457,
+      "lastAccessed": 1779876364307,
       "type": "file"
     },
     {
       "path": "test\\setup.ts",
       "accessCount": 6,
       "lastAccessed": 1779871430907,
-      "type": "file"
-    },
-    {
-      "path": "client\\src\\router\\index.ts",
-      "accessCount": 6,
-      "lastAccessed": 1779872555125,
       "type": "file"
     },
     {
@@ -388,14 +388,20 @@
     },
     {
       "path": "src\\lib\\errors.ts",
-      "accessCount": 5,
-      "lastAccessed": 1779874761261,
+      "accessCount": 6,
+      "lastAccessed": 1779876321630,
       "type": "file"
     },
     {
       "path": "src\\services\\auth.service.ts",
       "accessCount": 5,
       "lastAccessed": 1779874799334,
+      "type": "file"
+    },
+    {
+      "path": "src\\types.ts",
+      "accessCount": 5,
+      "lastAccessed": 1779876322333,
       "type": "file"
     },
     {
@@ -414,12 +420,6 @@
       "path": "src\\lib\\vectordb.ts",
       "accessCount": 4,
       "lastAccessed": 1779874791202,
-      "type": "file"
-    },
-    {
-      "path": "src\\types.ts",
-      "accessCount": 4,
-      "lastAccessed": 1779874800198,
       "type": "file"
     },
     {
