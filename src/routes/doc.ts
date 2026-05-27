@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { authenticate, requireKBAccess } from "../middleware/auth.js";
+import { logAudit } from "../lib/audit.js";
 import { processDocument, listDocuments, deleteDocument, getDocPreview } from "../services/doc.service.js";
 import { config } from "../config.js";
 import fs from "node:fs/promises";
@@ -51,6 +52,8 @@ export async function docRoutes(app: FastifyInstance) {
       request.user!.id,
     );
 
+    logAudit(request.user!.id, "upload_doc", "document", docId).catch(() => {});
+
     return reply.status(201).send({
       success: true,
       data: { id: docId, filename: file.filename, status: "processing", chunkCount: 0 },
@@ -85,6 +88,7 @@ export async function docRoutes(app: FastifyInstance) {
   app.delete("/api/kb/:id/docs/:docId", { preHandler: [requireKBAccess] }, async (request, reply) => {
     const { id: kbId, docId } = request.params as { id: string; docId: string };
     await deleteDocument(kbId, docId);
+    logAudit(request.user!.id, "delete_doc", "document", docId).catch(() => {});
     return reply.status(204).send();
   });
 }

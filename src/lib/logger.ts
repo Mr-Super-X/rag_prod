@@ -10,6 +10,7 @@ const logFile = path.join(logDir, `app-${new Date().toISOString().slice(0, 10)}.
 
 export const loggerConfig = {
   level: process.env.LOG_LEVEL || "info",
+  redact: ["req.headers.authorization"],
   transport: {
     targets: [
       // 控制台输出（开发友好）

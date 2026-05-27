@@ -190,4 +190,48 @@ docker exec -it rag_prod-ollama-1 ollama list
 
 # 或 HTTP API
 curl http://localhost:11434/api/tags
+
+---
+
+## V11 功能
+
+### Q: 生成 API Key 时返回 500？
+
+**原因**：通常是 API Key 哈希算法与数据库记录不匹配，或 `keyPrefix` 字段长度超限。
+
+检查：
+- 确认 `src/routes/auth.ts` 和 `src/middleware/auth.ts` 中 keyHash 使用 `crypto.scrypt`（非 SHA256）
+- 确认 `src/db/schema.ts` 中 `keyPrefix` 为 `varchar(10)`
+- 确认已执行 `npx drizzle-kit generate && npx drizzle-kit migrate` 创建 `api_keys` 表
+
+### Q: 登录报 "Invalid or expired token"？
+
+**原因**：V11 新增的 `authenticate` hook 可能污染了登录路由。
+
+检查 `src/routes/auth.ts`：
+- 确认没有 `app.addHook("onRequest", authenticate)` 全局 hook
+- API Key 路由应使用 `{ preHandler: [authenticate] }` 单独鉴权
+
+### Q: 审计日志或反馈统计页面为空？
+
+**原因**：数据库表尚未创建。
+
+```bash
+npx drizzle-kit generate
+npx drizzle-kit migrate
+```
+
+确认 `audit_logs`、`message_feedback` 表已存在。
+
+### Q: 如何使用 API Key 调用问答接口？
+
+```bash
+curl -X POST http://localhost:3000/api/kb/{kbId}/chat \\
+  -H "Authorization: Bearer ak_xxxxxxxx" \\
+  -H "Content-Type: application/json" \\
+  -H "Accept: text/event-stream" \\
+  -d '{"question": "你的问题"}'
+```
+
+注意：API Key 端点也支持 JWT（原有的 `Authorization: Bearer <jwt>` 仍然可用）。
 ```

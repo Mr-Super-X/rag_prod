@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { db, schema } from "../db/index.js";
-import { eq, and } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
+import crypto from "node:crypto";
 
 declare module "@fastify/jwt" {
   interface FastifyJWT {
@@ -52,5 +53,42 @@ export async function requireKBAccess(request: FastifyRequest, reply: FastifyRep
       success: false,
       error: { code: "FORBIDDEN", message: "You don't have access to this knowledge base" },
     });
+  }
+}
+
+export async function authenticateApiKey(request: FastifyRequest, reply: FastifyReply) {
+  const authHeader = request.headers.authorization;
+  if (!authHeader?.startsWith("Bearer ")) return;
+
+  const key = authHeader.slice(7);
+  if (!key.startsWith("ak_") || key.length < 20) return;
+
+  const keyHash = await new Promise<string>((resolve, reject) => {
+    crypto.scrypt(key, "apikey_salt", 32, (err, d) => (err ? reject(err) : resolve(d.toString("hex"))));
+  });
+
+  const [apiKey] = await db
+    .select()
+    .from(schema.apiKeys)
+    .where(and(eq(schema.apiKeys.keyHash, keyHash), isNull(schema.apiKeys.revokedAt)))
+    .limit(1);
+
+  if (!apiKey) return;
+
+  // 更新最后使用时间
+  await db
+    .update(schema.apiKeys)
+    .set({ lastUsedAt: new Date() })
+    .where(eq(schema.apiKeys.id, apiKey.id))
+    .catch(() => { /* 非关键 */ });
+
+  const [user] = await db
+    .select({ id: schema.users.id, username: schema.users.username, role: schema.users.role })
+    .from(schema.users)
+    .where(eq(schema.users.id, apiKey.userId))
+    .limit(1);
+
+  if (user) {
+    request.user = user as { id: string; username: string; role: "admin" | "user" };
   }
 }

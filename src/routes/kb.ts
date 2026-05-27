@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { authenticate, requireKBAccess } from "../middleware/auth.js";
+import { logAudit } from "../lib/audit.js";
 import { db, schema } from "../db/index.js";
 import { eq, and } from "drizzle-orm";
 import {
@@ -37,6 +38,7 @@ export async function kbRoutes(app: FastifyInstance) {
   app.post("/api/kb", { schema: { body: kbBody } }, async (request, reply) => {
     const { name, description } = request.body as { name: string; description?: string };
     const kb = await createKB({ name, description }, request.user!.id);
+    logAudit(request.user!.id, "create_kb", "knowledge_base", kb.id).catch(() => {});
     return reply.status(201).send({ success: true, data: kb });
   });
 
@@ -56,6 +58,7 @@ export async function kbRoutes(app: FastifyInstance) {
   app.delete("/api/kb/:id", { preHandler: [requireKBAccess] }, async (request, reply) => {
     const { id } = request.params as { id: string };
     await deleteKB(id, request.user!.id, request.user!.role);
+    logAudit(request.user!.id, "delete_kb", "knowledge_base", id).catch(() => {});
     return reply.status(204).send();
   });
 

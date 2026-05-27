@@ -125,6 +125,7 @@ async function scrollDown() {
         :content="msg.content"
         :sources="msg.sources"
         :created-at="msg.createdAt"
+        :message-id="msg.role === 'assistant' ? msg.id : undefined"
       />
 
       <div v-if="thinking" class="thinking">

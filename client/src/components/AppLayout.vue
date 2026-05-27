@@ -32,6 +32,7 @@ function handleLogout() {
       </div>
       <div class="header-right">
         <router-link v-if="auth.isAdmin" to="/admin" class="btn-admin">管理</router-link>
+        <router-link to="/settings" class="btn-admin">设置</router-link>
         <button class="btn-theme" @click="toggleTheme" :title="isDark ? '浅色模式' : '深色模式'">
           {{ isDark ? '☀' : '☾' }}
         </button>

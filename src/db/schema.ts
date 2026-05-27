@@ -149,3 +149,59 @@ export const messages = pgTable(
   },
   (t) => [index("idx_messages_conversation_id").on(t.conversationId)],
 );
+
+export const messageFeedback = pgTable(
+  "message_feedback",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    messageId: uuid("message_id")
+      .notNull()
+      .references(() => messages.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    rating: integer("rating").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("idx_feedback_message_id").on(t.messageId),
+    index("idx_feedback_user_id").on(t.userId),
+  ],
+);
+
+export const auditLogs = pgTable(
+  "audit_logs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    action: varchar("action", { length: 50 }).notNull(),
+    resource: varchar("resource", { length: 50 }).notNull(),
+    resourceId: varchar("resource_id", { length: 100 }),
+    ip: varchar("ip", { length: 45 }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("idx_audit_user_id").on(t.userId),
+    index("idx_audit_created_at").on(t.createdAt),
+  ],
+);
+
+export const apiKeys = pgTable(
+  "api_keys",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    keyHash: varchar("key_hash", { length: 255 }).notNull().unique(),
+    keyPrefix: varchar("key_prefix", { length: 8 }).notNull(),
+    name: varchar("name", { length: 100 }).notNull(),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  },
+  (t) => [index("idx_api_keys_hash").on(t.keyHash)],
+);

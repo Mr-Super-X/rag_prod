@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
+import { api } from "@/lib/api.js";
 import type { ChunkSource } from "@/types.js";
 
 const props = defineProps<{
@@ -7,12 +8,23 @@ const props = defineProps<{
   content: string;
   sources?: ChunkSource[] | null;
   createdAt: string;
+  messageId?: string;
 }>();
 
 const expandedIdx = ref<number | null>(null);
 
 function toggleSource(idx: number) {
   expandedIdx.value = expandedIdx.value === idx ? null : idx;
+}
+
+const feedback = ref<number | null>(null);
+
+async function submitFeedback(rating: number) {
+  if (!props.messageId) return;
+  try {
+    const res = await api.post<{ rating: number | null }>(`/messages/${props.messageId}/feedback`, { rating });
+    feedback.value = res.data.rating;
+  } catch { /* ignore */ }
 }
 
 interface ContentSegment {
@@ -94,6 +106,10 @@ function parseContent(raw: string, sources: ChunkSource[] | null | undefined): C
         </details>
       </div>
 
+      <div v-if="role === 'assistant' && messageId" class="feedback-row">
+        <button class="btn-fb" :class="{ active: feedback === 1 }" @click="submitFeedback(1)" title="有用">👍</button>
+        <button class="btn-fb" :class="{ active: feedback === -1 }" @click="submitFeedback(-1)" title="没用">👎</button>
+      </div>
       <div class="time">{{ new Date(createdAt).toLocaleTimeString("zh-CN") }}</div>
     </div>
   </div>
@@ -146,4 +162,8 @@ function parseContent(raw: string, sources: ChunkSource[] | null | undefined): C
   border-radius: var(--radius); font-size: 12px;
 }
 .src-name { font-weight: 600; }
+.feedback-row { display: flex; gap: 4px; margin-top: 4px; }
+.btn-fb { background: transparent; font-size: 14px; padding: 2px 6px; border-radius: 4px; opacity: 0.5; }
+.btn-fb:hover { opacity: 1; background: #f0f0f0; }
+.btn-fb.active { opacity: 1; background: #e0e7ff; }
 </style>

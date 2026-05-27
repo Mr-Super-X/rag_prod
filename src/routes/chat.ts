@@ -1,5 +1,7 @@
 import type { FastifyInstance } from "fastify";
-import { authenticate, requireKBAccess } from "../middleware/auth.js";
+import { authenticate, requireKBAccess, authenticateApiKey } from "../middleware/auth.js";
+import { db, schema } from "../db/index.js";
+import { eq, and } from "drizzle-orm";
 import { ask, streamAsk, buildContext, validateAndInjectCitations } from "../services/chat.service.js";
 import { streamGenerate } from "../pipeline/generator.js";
 import { addMessage } from "../services/context.service.js";
@@ -21,6 +23,7 @@ const chatBody = {
 } as const;
 
 export async function chatRoutes(app: FastifyInstance) {
+  app.addHook("onRequest", authenticateApiKey);
   app.addHook("onRequest", authenticate);
 
   // 问答（非流式，V1 兼容）
@@ -118,5 +121,36 @@ export async function chatRoutes(app: FastifyInstance) {
     reply.header("Content-Type", "text/markdown; charset=utf-8");
     reply.header("Content-Disposition", `attachment; filename="conversation-${id.slice(0, 8)}.md"`);
     return lines.join("\n");
+  });
+
+  // 消息反馈（赞/踩）
+  app.post("/api/messages/:id/feedback", async (request, reply) => {
+    const { id: messageId } = request.params as { id: string };
+    const { rating } = request.body as { rating: number };
+    if (![1, -1].includes(rating)) {
+      return reply.status(400).send({ success: false, error: { code: "INVALID_RATING", message: "Rating must be 1 or -1" } });
+    }
+    const userId = request.user!.id;
+
+    const [existing] = await db
+      .select()
+      .from(schema.messageFeedback)
+      .where(and(eq(schema.messageFeedback.messageId, messageId), eq(schema.messageFeedback.userId, userId)))
+      .limit(1);
+
+    if (existing) {
+      if (existing.rating === rating) {
+        await db.delete(schema.messageFeedback).where(eq(schema.messageFeedback.id, existing.id));
+        return { success: true, data: { rating: null } };
+      }
+      await db
+        .update(schema.messageFeedback)
+        .set({ rating, updatedAt: new Date() })
+        .where(eq(schema.messageFeedback.id, existing.id));
+      return { success: true, data: { rating } };
+    }
+
+    await db.insert(schema.messageFeedback).values({ messageId, userId, rating });
+    return reply.status(201).send({ success: true, data: { rating } });
   });
 }
