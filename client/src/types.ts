@@ -20,6 +20,7 @@ export interface Document {
   fileType: string;
   fileSize: number | null;
   status: "queued" | "processing" | "ready" | "error";
+  progressStep: string | null;
   chunkCount: number;
   errorMessage: string | null;
   createdAt: string;
@@ -30,6 +31,7 @@ export interface ChunkSource {
   chunkId: string;
   content: string;
   score: number;
+  vectorScore?: number;
   docFilename: string;
 }
 

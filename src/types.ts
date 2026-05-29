@@ -8,6 +8,7 @@ export interface ChunkSource {
   chunkId: string;
   content: string;
   score: number;
+  vectorScore?: number;
   docFilename: string;
 }
 

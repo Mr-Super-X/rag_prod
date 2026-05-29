@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { authenticate, requireAdmin } from "../middleware/auth.js";
 import { logAudit } from "../lib/audit.js";
 import { db, schema } from "../db/index.js";
-import { eq, count, desc, gte } from "drizzle-orm";
+import { eq, count, desc, gte, and, sql } from "drizzle-orm";
 
 export async function adminRoutes(app: FastifyInstance) {
   app.addHook("preHandler", authenticate);
@@ -128,5 +128,79 @@ export async function adminRoutes(app: FastifyInstance) {
       success: true,
       data: { total, upCount, downCount: total - upCount, rate, recent: allFeedback.slice(0, 20) },
     };
+  });
+
+  // 使用趋势（近 N 天每日提问量和活跃用户）
+  app.get("/api/admin/trends", async (request) => {
+    const { days: rawDays } = (request.query as Record<string, string>) || {};
+    const days = Math.min(parseInt(rawDays || "30", 10) || 30, 90);
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    // 每日提问量（user 角色消息数）
+    const questionRows = await db
+      .select({
+        day: sql<string>`DATE(${schema.messages.createdAt})`,
+        n: count(),
+      })
+      .from(schema.messages)
+      .where(and(gte(schema.messages.createdAt, since), eq(schema.messages.role, "user")))
+      .groupBy(sql`DATE(${schema.messages.createdAt})`)
+      .orderBy(sql`DATE(${schema.messages.createdAt})`);
+
+    // 每日活跃用户（audit_logs 去重 user_id）
+    const activeRows = await db
+      .select({
+        day: sql<string>`DATE(${schema.auditLogs.createdAt})`,
+        n: count(),
+      })
+      .from(schema.auditLogs)
+      .where(gte(schema.auditLogs.createdAt, since))
+      .groupBy(sql`DATE(${schema.auditLogs.createdAt})`)
+      .orderBy(sql`DATE(${schema.auditLogs.createdAt})`);
+
+    // 构建 30 天完整序列，填充 0
+    const dayMap = new Map<string, { questions: number; activeUsers: number }>();
+    for (let i = 0; i < days; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      dayMap.set(d.toISOString().slice(0, 10), { questions: 0, activeUsers: 0 });
+    }
+    for (const r of questionRows) dayMap.get(r.day)!.questions = r.n;
+    for (const r of activeRows) dayMap.get(r.day)!.activeUsers = r.n;
+
+    const sorted = Array.from(dayMap.entries())
+      .sort(([a], [b]) => a.localeCompare(b));
+
+    return {
+      success: true,
+      data: {
+        days: sorted.map(([d]) => d),
+        questions: sorted.map(([, v]) => v.questions),
+        activeUsers: sorted.map(([, v]) => v.activeUsers),
+      },
+    };
+  });
+
+  // 失败文档汇聚
+  app.get("/api/admin/error-docs", async () => {
+    const errorDocs = await db
+      .select({
+        docId: schema.documents.id,
+        kbId: schema.documents.kbId,
+        kbName: schema.knowledgeBases.name,
+        filename: schema.documents.filename,
+        uploaderUsername: schema.users.username,
+        errorMessage: schema.documents.errorMessage,
+        createdAt: schema.documents.createdAt,
+      })
+      .from(schema.documents)
+      .leftJoin(schema.users, eq(schema.documents.uploadedBy, schema.users.id))
+      .leftJoin(schema.knowledgeBases, eq(schema.documents.kbId, schema.knowledgeBases.id))
+      .where(eq(schema.documents.status, "error"))
+      .orderBy(desc(schema.documents.createdAt))
+      .limit(100);
+
+    return { success: true, data: errorDocs };
   });
 }

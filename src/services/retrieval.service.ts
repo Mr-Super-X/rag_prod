@@ -146,6 +146,7 @@ export async function retrieve(kbId: string, question: string): Promise<ChunkSou
         chunkId,
         content: String(match.payload.content || ""),
         score,
+        vectorScore: match.score,
         docFilename: String(match.payload.docFilename || ""),
       });
     }

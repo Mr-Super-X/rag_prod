@@ -54,6 +54,20 @@ function openPreview(docId: string) {
 function statusLabel(s: string): string {
   return { queued: "排队中", processing: "处理中", ready: "就绪", error: "失败" }[s] || s;
 }
+
+const steps = ["parsing", "splitting", "embedding", "indexing", "ready"] as const;
+const stepLabels: Record<string, string> = {
+  parsing: "解析", splitting: "切分", embedding: "向量化", indexing: "索引", ready: "就绪",
+};
+
+function stepStatus(current: string | null | undefined, step: string): "done" | "current" | "pending" {
+  if (!current) return "pending";
+  const curIdx = steps.indexOf(current as typeof steps[number]);
+  const stepIdx = steps.indexOf(step as typeof steps[number]);
+  if (stepIdx < curIdx) return "done";
+  if (stepIdx === curIdx) return "current";
+  return "pending";
+}
 </script>
 
 <template>
@@ -69,6 +83,14 @@ function statusLabel(s: string): string {
         <span class="doc-name">{{ doc.filename }}</span>
         <span class="doc-type">{{ doc.fileType }}</span>
         <span class="doc-status" :class="doc.status">{{ statusLabel(doc.status) }}</span>
+        <span v-if="doc.status === 'processing' && doc.progressStep" class="steps-row">
+          <span
+            v-for="step in steps"
+            :key="step"
+            class="step-dot"
+            :class="stepStatus(doc.progressStep, step)"
+          >{{ stepLabels[step] }}</span>
+        </span>
         <span class="doc-chunks" v-if="doc.status === 'ready'">{{ doc.chunkCount }} 块</span>
         <span class="doc-error" v-if="doc.status === 'error'">{{ doc.errorMessage }}</span>
         <button v-if="doc.status === 'ready'" class="btn-preview" @click="openPreview(doc.id)">预览</button>
@@ -112,4 +134,13 @@ h4 { font-size: 15px; font-weight: 600; }
 .doc-error { color: var(--color-danger); font-size: 11px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .btn-del { background: transparent; color: var(--color-danger); font-size: 12px; padding: 4px 8px; }
 .btn-del:hover { background: #fef2f2; }
+.steps-row { display: flex; gap: 2px; align-items: center; }
+.step-dot {
+  font-size: 11px; padding: 1px 6px; border-radius: 8px;
+  color: var(--color-text-secondary); background: #f3f4f6;
+  transition: all 0.3s;
+}
+.step-dot.current { color: #92400e; background: #fef3c7; animation: pulse 1.5s infinite; }
+.step-dot.done { color: #166534; background: #dcfce7; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 </style>

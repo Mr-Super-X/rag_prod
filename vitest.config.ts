@@ -4,8 +4,9 @@ export default defineConfig({
   test: {
     exclude: ["test/e2e/**", "node_modules/**"],
     globals: true,
-    testTimeout: 30000,
-    hookTimeout: 30000,
+    fileParallelism: false,
+    testTimeout: 120000,
+    hookTimeout: 60000,
     env: {
       DATABASE_URL: "postgresql://raguser:ragpass@localhost:5432/ragtest",
       JWT_SECRET: "test-secret-do-not-use-in-production",

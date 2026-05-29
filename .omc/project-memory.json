@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1779794940696,
+  "lastScanned": 1780021570907,
   "projectRoot": "D:\\personal\\AI\\rag_prod",
   "techStack": {
     "languages": [
@@ -28,6 +28,11 @@
         "category": "backend"
       },
       {
+        "name": "@playwright/test",
+        "version": "1.60.0",
+        "category": "testing"
+      },
+      {
         "name": "vitest",
         "version": "3.0.0",
         "category": "testing"
@@ -49,7 +54,10 @@
       "db:migrate": "drizzle-kit migrate",
       "db:studio": "drizzle-kit studio",
       "test": "vitest run",
-      "test:watch": "vitest"
+      "test:watch": "vitest",
+      "backup": "tsx scripts/backup.ts",
+      "test:e2e": "playwright test",
+      "docker:restart": "docker-compose down && docker-compose up -d"
     }
   },
   "conventions": {
@@ -98,21 +106,21 @@
     "client": {
       "path": "client",
       "purpose": null,
-      "fileCount": 6,
-      "lastAccessed": 1779794940624,
+      "fileCount": 7,
+      "lastAccessed": 1780021570860,
       "keyFiles": [
+        "AGENTS.md",
         "env.d.ts",
         "index.html",
         "package-lock.json",
-        "package.json",
-        "tsconfig.json"
+        "package.json"
       ]
     },
     "data": {
       "path": "data",
       "purpose": "Data files",
       "fileCount": 2,
-      "lastAccessed": 1779794940632,
+      "lastAccessed": 1780021570860,
       "keyFiles": [
         "test-doc.md",
         "test-upload.md"
@@ -121,31 +129,55 @@
     "docs": {
       "path": "docs",
       "purpose": "Documentation",
-      "fileCount": 6,
-      "lastAccessed": 1779794940655,
+      "fileCount": 14,
+      "lastAccessed": 1780021570870,
       "keyFiles": [
-        "V1开发实录-从方案到落地.md",
+        "AGENTS.md",
+        "产品概述与定位.md",
         "企业级RAG知识库架构设计与落地.md",
         "功能清单.md",
-        "小白部署指南-从本地到上线.md",
-        "架构设计与实现细节.md"
+        "小白部署指南-从本地到上线.md"
+      ]
+    },
+    "exports": {
+      "path": "exports",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1780021570871,
+      "keyFiles": [
+        "ollama-latest.tar",
+        "ollama-models.tar.gz",
+        "postgres-15-alpine.tar",
+        "redis-7-alpine.tar"
+      ]
+    },
+    "logs": {
+      "path": "logs",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1780021570872,
+      "keyFiles": [
+        "app-2026-05-27.log"
       ]
     },
     "scripts": {
       "path": "scripts",
       "purpose": "Build/utility scripts",
-      "fileCount": 1,
-      "lastAccessed": 1779794940656,
+      "fileCount": 3,
+      "lastAccessed": 1780021570872,
       "keyFiles": [
+        "AGENTS.md",
+        "backup.ts",
         "seed.ts"
       ]
     },
     "src": {
       "path": "src",
       "purpose": "Source code",
-      "fileCount": 4,
-      "lastAccessed": 1779794940657,
+      "fileCount": 5,
+      "lastAccessed": 1780021570872,
       "keyFiles": [
+        "AGENTS.md",
         "app.ts",
         "config.ts",
         "server.ts",
@@ -155,89 +187,91 @@
     "test": {
       "path": "test",
       "purpose": "Test files",
-      "fileCount": 4,
-      "lastAccessed": 1779794940657,
+      "fileCount": 8,
+      "lastAccessed": 1780021570873,
       "keyFiles": [
+        "admin.test.ts",
+        "AGENTS.md",
+        "apikey.test.ts",
         "auth.test.ts",
-        "chat.test.ts",
-        "kb.test.ts",
-        "setup.ts"
+        "chat.test.ts"
+      ]
+    },
+    "client\\dist": {
+      "path": "client\\dist",
+      "purpose": "Distribution/build output",
+      "fileCount": 1,
+      "lastAccessed": 1780021570874,
+      "keyFiles": [
+        "index.html"
       ]
     },
     "client\\node_modules": {
       "path": "client\\node_modules",
       "purpose": "Dependencies",
       "fileCount": 1,
-      "lastAccessed": 1779794940658,
+      "lastAccessed": 1780021570874,
       "keyFiles": []
     },
     "client\\public": {
       "path": "client\\public",
       "purpose": "Public files",
       "fileCount": 0,
-      "lastAccessed": 1779794940658,
+      "lastAccessed": 1780021570875,
       "keyFiles": []
     },
     "client\\src": {
       "path": "client\\src",
       "purpose": "Source code",
-      "fileCount": 3,
-      "lastAccessed": 1779794940659,
+      "fileCount": 4,
+      "lastAccessed": 1780021570875,
       "keyFiles": [
+        "AGENTS.md",
         "App.vue",
-        "main.ts",
-        "types.ts"
+        "main.ts"
       ]
     },
     "src\\lib": {
       "path": "src\\lib",
       "purpose": "Library code",
-      "fileCount": 3,
-      "lastAccessed": 1779794940660,
+      "fileCount": 6,
+      "lastAccessed": 1780021570877,
       "keyFiles": [
-        "errors.ts",
-        "redis.ts",
-        "vectordb.ts"
+        "AGENTS.md",
+        "audit.ts",
+        "errors.ts"
       ]
     },
     "src\\middleware": {
       "path": "src\\middleware",
       "purpose": "Middleware",
-      "fileCount": 1,
-      "lastAccessed": 1779794940660,
+      "fileCount": 2,
+      "lastAccessed": 1780021570878,
       "keyFiles": [
+        "AGENTS.md",
         "auth.ts"
       ]
     },
     "src\\routes": {
       "path": "src\\routes",
       "purpose": "Route handlers",
-      "fileCount": 4,
-      "lastAccessed": 1779794940661,
+      "fileCount": 6,
+      "lastAccessed": 1780021570878,
       "keyFiles": [
-        "auth.ts",
-        "chat.ts",
-        "doc.ts"
+        "admin.ts",
+        "AGENTS.md",
+        "auth.ts"
       ]
     },
     "src\\services": {
       "path": "src\\services",
       "purpose": "Business logic services",
-      "fileCount": 6,
-      "lastAccessed": 1779794940661,
+      "fileCount": 7,
+      "lastAccessed": 1780021570879,
       "keyFiles": [
+        "AGENTS.md",
         "auth.service.ts",
-        "chat.service.ts",
-        "context.service.ts"
-      ]
-    },
-    "src\\types": {
-      "path": "src\\types",
-      "purpose": "Type definitions",
-      "fileCount": 1,
-      "lastAccessed": 1779794940661,
-      "keyFiles": [
-        "pdf-parse.d.ts"
+        "chat.service.ts"
       ]
     }
   },
@@ -256,8 +290,26 @@
     },
     {
       "path": "src\\routes\\chat.ts",
-      "accessCount": 36,
-      "lastAccessed": 1779876320742,
+      "accessCount": 38,
+      "lastAccessed": 1780023359377,
+      "type": "file"
+    },
+    {
+      "path": "src\\routes\\doc.ts",
+      "accessCount": 32,
+      "lastAccessed": 1780026689437,
+      "type": "file"
+    },
+    {
+      "path": "src\\db\\schema.ts",
+      "accessCount": 29,
+      "lastAccessed": 1780035084682,
+      "type": "file"
+    },
+    {
+      "path": "src\\pipeline\\generator.ts",
+      "accessCount": 28,
+      "lastAccessed": 1780035070904,
       "type": "file"
     },
     {
@@ -273,21 +325,15 @@
       "type": "file"
     },
     {
-      "path": "src\\db\\schema.ts",
+      "path": "src\\config.ts",
       "accessCount": 24,
-      "lastAccessed": 1779876826889,
+      "lastAccessed": 1780028280684,
       "type": "file"
     },
     {
       "path": "src\\services\\kb.service.ts",
       "accessCount": 22,
       "lastAccessed": 1779874798650,
-      "type": "file"
-    },
-    {
-      "path": "src\\routes\\doc.ts",
-      "accessCount": 21,
-      "lastAccessed": 1779876363437,
       "type": "file"
     },
     {
@@ -298,14 +344,8 @@
     },
     {
       "path": "src\\services\\chat.service.ts",
-      "accessCount": 19,
-      "lastAccessed": 1779876327218,
-      "type": "file"
-    },
-    {
-      "path": "src\\config.ts",
-      "accessCount": 19,
-      "lastAccessed": 1779876828007,
+      "accessCount": 21,
+      "lastAccessed": 1780023802876,
       "type": "file"
     },
     {
@@ -316,8 +356,20 @@
     },
     {
       "path": "src\\app.ts",
-      "accessCount": 18,
-      "lastAccessed": 1779876315324,
+      "accessCount": 19,
+      "lastAccessed": 1780023350356,
+      "type": "file"
+    },
+    {
+      "path": "src\\services\\doc.service.ts",
+      "accessCount": 19,
+      "lastAccessed": 1780024861414,
+      "type": "file"
+    },
+    {
+      "path": "test\\setup.ts",
+      "accessCount": 19,
+      "lastAccessed": 1780035125553,
       "type": "file"
     },
     {
@@ -327,27 +379,33 @@
       "type": "file"
     },
     {
-      "path": "src\\pipeline\\generator.ts",
-      "accessCount": 12,
-      "lastAccessed": 1779877420669,
+      "path": "src\\services\\retrieval.service.ts",
+      "accessCount": 13,
+      "lastAccessed": 1780024296438,
       "type": "file"
     },
     {
       "path": "src\\pipeline\\reranker.ts",
-      "accessCount": 9,
-      "lastAccessed": 1779874788741,
+      "accessCount": 10,
+      "lastAccessed": 1780020766206,
       "type": "file"
     },
     {
-      "path": "src\\services\\doc.service.ts",
-      "accessCount": 8,
-      "lastAccessed": 1779874777641,
+      "path": "vitest.config.ts",
+      "accessCount": 10,
+      "lastAccessed": 1780035069882,
       "type": "file"
     },
     {
       "path": "src\\services\\context.service.ts",
-      "accessCount": 8,
-      "lastAccessed": 1779874792445,
+      "accessCount": 9,
+      "lastAccessed": 1780023371285,
+      "type": "file"
+    },
+    {
+      "path": "src\\types.ts",
+      "accessCount": 9,
+      "lastAccessed": 1780024266507,
       "type": "file"
     },
     {
@@ -357,33 +415,21 @@
       "type": "file"
     },
     {
-      "path": "src\\services\\retrieval.service.ts",
-      "accessCount": 8,
-      "lastAccessed": 1779876326407,
-      "type": "file"
-    },
-    {
       "path": "client\\src\\router\\index.ts",
-      "accessCount": 7,
-      "lastAccessed": 1779876364307,
+      "accessCount": 8,
+      "lastAccessed": 1780023386958,
       "type": "file"
     },
     {
-      "path": "test\\setup.ts",
-      "accessCount": 6,
-      "lastAccessed": 1779871430907,
-      "type": "file"
-    },
-    {
-      "path": "vitest.config.ts",
-      "accessCount": 6,
-      "lastAccessed": 1779872650722,
+      "path": "src\\lib\\vectordb.ts",
+      "accessCount": 8,
+      "lastAccessed": 1780024274201,
       "type": "file"
     },
     {
       "path": "package.json",
-      "accessCount": 6,
-      "lastAccessed": 1779874758592,
+      "accessCount": 7,
+      "lastAccessed": 1780027633802,
       "type": "file"
     },
     {
@@ -399,12 +445,6 @@
       "type": "file"
     },
     {
-      "path": "src\\types.ts",
-      "accessCount": 5,
-      "lastAccessed": 1779876322333,
-      "type": "file"
-    },
-    {
       "path": "src\\pipeline\\embedder.ts",
       "accessCount": 4,
       "lastAccessed": 1779874779444,
@@ -414,12 +454,6 @@
       "path": "src\\pipeline\\splitter.ts",
       "accessCount": 4,
       "lastAccessed": 1779874780398,
-      "type": "file"
-    },
-    {
-      "path": "src\\lib\\vectordb.ts",
-      "accessCount": 4,
-      "lastAccessed": 1779874791202,
       "type": "file"
     },
     {
@@ -435,15 +469,21 @@
       "type": "file"
     },
     {
-      "path": "docker-compose.mac.yml",
-      "accessCount": 3,
-      "lastAccessed": 1779871402134,
+      "path": "docker-compose.yml",
+      "accessCount": 4,
+      "lastAccessed": 1780020768901,
       "type": "file"
     },
     {
-      "path": "docker-compose.yml",
+      "path": "src\\db\\index.ts",
+      "accessCount": 4,
+      "lastAccessed": 1780027861069,
+      "type": "file"
+    },
+    {
+      "path": "docker-compose.mac.yml",
       "accessCount": 3,
-      "lastAccessed": 1779871402292,
+      "lastAccessed": 1779871402134,
       "type": "file"
     },
     {
@@ -465,12 +505,6 @@
       "type": "file"
     },
     {
-      "path": "src\\db\\index.ts",
-      "accessCount": 3,
-      "lastAccessed": 1779874800979,
-      "type": "file"
-    },
-    {
       "path": "src\\server.ts",
       "accessCount": 3,
       "lastAccessed": 1779874802337,
@@ -483,15 +517,15 @@
       "type": "file"
     },
     {
-      "path": "tsconfig.json",
-      "accessCount": 1,
-      "lastAccessed": 1779795261344,
+      "path": "drizzle.config.ts",
+      "accessCount": 2,
+      "lastAccessed": 1780027656580,
       "type": "file"
     },
     {
-      "path": "drizzle.config.ts",
+      "path": "tsconfig.json",
       "accessCount": 1,
-      "lastAccessed": 1779795262352,
+      "lastAccessed": 1779795261344,
       "type": "file"
     },
     {

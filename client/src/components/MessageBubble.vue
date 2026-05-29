@@ -19,6 +19,16 @@ function toggleSource(idx: number) {
 
 const feedback = ref<number | null>(null);
 
+interface ConfidenceLevel { level: "high" | "medium" | "low"; label: string; color: string }
+
+const confidence = computed<ConfidenceLevel | null>(() => {
+  if (!props.sources || props.sources.length === 0) return null;
+  const topScore = props.sources[0].vectorScore ?? props.sources[0].score;
+  if (topScore >= 0.7) return { level: "high", label: "高置信度", color: "#22c55e" };
+  if (topScore >= 0.4) return { level: "medium", label: "中置信度", color: "#eab308" };
+  return { level: "low", label: "低置信度", color: "#9ca3af" };
+});
+
 async function submitFeedback(rating: number) {
   if (!props.messageId) return;
   try {
@@ -67,6 +77,9 @@ function parseContent(raw: string, sources: ChunkSource[] | null | undefined): C
   <div class="bubble" :class="role">
     <div class="avatar">{{ role === "user" ? "我" : "AI" }}</div>
     <div class="body">
+      <div v-if="role === 'assistant' && confidence" class="confidence-badge" :style="{ '--conf-color': confidence.color }">
+        {{ confidence.label }}
+      </div>
       <div class="content">
         <template v-if="role === 'assistant'">
           <template v-for="(seg, i) in parsedContent" :key="i">
@@ -89,7 +102,7 @@ function parseContent(raw: string, sources: ChunkSource[] | null | undefined): C
       >
         <div class="expanded-header">
           <span class="src-label">来源: {{ sources[expandedIdx].docFilename }}</span>
-          <span class="src-score">{{ (sources[expandedIdx].score * 100).toFixed(0) }}% 相关</span>
+          <span class="src-score">{{ sources[expandedIdx].vectorScore ? (sources[expandedIdx].vectorScore! * 100).toFixed(0) : (sources[expandedIdx].score * 100).toFixed(0) }}% 相关</span>
         </div>
         <p class="src-text">{{ sources[expandedIdx].content }}</p>
       </div>
@@ -100,7 +113,7 @@ function parseContent(raw: string, sources: ChunkSource[] | null | undefined): C
           <summary>全部来源 ({{ sources.length }})</summary>
           <div v-for="(s, i) in sources" :key="s.chunkId" class="source-item">
             <span class="src-name">[{{ i + 1 }}] {{ s.docFilename }}</span>
-            <span class="src-score">{{ (s.score * 100).toFixed(0) }}%</span>
+            <span class="src-score">{{ s.vectorScore ? (s.vectorScore * 100).toFixed(0) : (s.score * 100).toFixed(0) }}%</span>
             <p class="src-text">{{ s.content.slice(0, 200) }}</p>
           </div>
         </details>
@@ -134,6 +147,12 @@ function parseContent(raw: string, sources: ChunkSource[] | null | undefined): C
   display: inline-block; text-align: left;
 }
 .time { font-size: 11px; color: var(--color-text-secondary); margin-top: 4px; }
+
+.confidence-badge {
+  font-size: 11px; font-weight: 600;
+  color: var(--conf-color, #9ca3af);
+  margin-bottom: 4px;
+}
 
 .cite-badge {
   display: inline; font-size: 12px; font-weight: 600;

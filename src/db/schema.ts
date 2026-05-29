@@ -68,6 +68,7 @@ export const documents = pgTable(
       .notNull()
       .references(() => users.id),
     errorMessage: text("error_message"),
+    progressStep: varchar("progress_step", { length: 20 }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },

@@ -2,6 +2,8 @@
 import { ref, onMounted } from "vue";
 import { api } from "@/lib/api.js";
 import AppLayout from "@/components/AppLayout.vue";
+import AdminTrends from "@/components/AdminTrends.vue";
+import AdminErrorDocs from "@/components/AdminErrorDocs.vue";
 
 interface User { id: string; username: string; role: string; createdAt: string; }
 interface KB { id: string; name: string; createdBy: string; createdAt: string; docCount: number; convCount: number; }
@@ -11,7 +13,7 @@ interface FeedbackStats { total: number; upCount: number; downCount: number; rat
 
 const users = ref<User[]>([]);
 const kbs = ref<KB[]>([]);
-const tab = ref<"users" | "kbs" | "overview" | "audit" | "feedback">("overview");
+const tab = ref<"users" | "kbs" | "overview" | "audit" | "feedback" | "trends" | "errors">("overview");
 
 const overview = ref<Overview>({ totalUsers: 0, totalKBs: 0, totalDocs: 0, totalConvs: 0, todayQuestions: 0 });
 const auditLogs = ref<AuditLog[]>([]);
@@ -65,6 +67,8 @@ function actionLabel(a: string): string {
         <button :class="{ active: tab === 'kbs' }" @click="tab = 'kbs'">知识库管理</button>
         <button :class="{ active: tab === 'audit' }" @click="tab = 'audit'; loadAudit()">审计日志</button>
         <button :class="{ active: tab === 'feedback' }" @click="tab = 'feedback'; loadFeedback()">反馈概览</button>
+        <button :class="{ active: tab === 'trends' }" @click="tab = 'trends'">使用趋势</button>
+        <button :class="{ active: tab === 'errors' }" @click="tab = 'errors'">失败文档</button>
       </div>
 
       <!-- 使用概览 -->
@@ -139,6 +143,12 @@ function actionLabel(a: string): string {
           </tbody>
         </table>
       </div>
+
+      <!-- 使用趋势 -->
+      <AdminTrends v-if="tab === 'trends'" />
+
+      <!-- 失败文档 -->
+      <AdminErrorDocs v-if="tab === 'errors'" />
     </div>
   </AppLayout>
 </template>

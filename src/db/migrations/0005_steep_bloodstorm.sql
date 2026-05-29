@@ -1,0 +1,1 @@
+ALTER TABLE "documents" ADD COLUMN "progress_step" varchar(20);

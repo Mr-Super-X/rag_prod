@@ -1,5 +1,11 @@
 import { config } from "../config.js";
 
+function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, { ...init, signal: controller.signal }).finally(() => clearTimeout(timer));
+}
+
 interface OllamaChatMessage {
   role: "system" | "user" | "assistant";
   content: string;
@@ -91,22 +97,22 @@ async function* deepseekStream(messages: ChatMessage[]): AsyncGenerator<string> 
 
 // Ollama API (unchanged logic, extracted)
 async function ollamaChat(messages: ChatMessage[]): Promise<string> {
-  const res = await fetch(`${config.OLLAMA_URL}/api/chat`, {
+  const res = await fetchWithTimeout(`${config.OLLAMA_URL}/api/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ model: config.LLM_MODEL, messages, stream: false, options: { temperature: 0.3, num_predict: 1024 } }),
-  });
+  }, 60000);
   if (!res.ok) throw new Error(`Ollama chat failed: ${res.status}`);
   const data = await res.json() as { message: { content: string } };
   return data.message.content;
 }
 
 async function* ollamaStream(messages: ChatMessage[]): AsyncGenerator<string> {
-  const res = await fetch(`${config.OLLAMA_URL}/api/chat`, {
+  const res = await fetchWithTimeout(`${config.OLLAMA_URL}/api/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ model: config.LLM_MODEL, messages, stream: true, options: { temperature: 0.3, num_predict: 1024 } }),
-  });
+  }, 60000);
   if (!res.ok) throw new Error(`Ollama stream failed: ${res.status}`);
   const reader = res.body!.getReader();
   const decoder = new TextDecoder();
@@ -163,7 +169,7 @@ ${contextLines}
 
 改写后的问题（只返回改写结果，不要加任何解释）：`;
 
-  const res = await fetch(`${config.OLLAMA_URL}/api/chat`, {
+  const res = await fetchWithTimeout(`${config.OLLAMA_URL}/api/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -172,7 +178,7 @@ ${contextLines}
       stream: false,
       options: { temperature: 0.1, num_predict: 100 },
     }),
-  });
+  }, 30000);
 
   if (!res.ok) return question; // 降级：失败则返回原始问题
 

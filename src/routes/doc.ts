@@ -1,7 +1,9 @@
 import type { FastifyInstance } from "fastify";
 import { authenticate, requireKBAccess } from "../middleware/auth.js";
 import { logAudit } from "../lib/audit.js";
-import { processDocument, listDocuments, deleteDocument, getDocPreview } from "../services/doc.service.js";
+import { processDocument, processDocumentAsync, listDocuments, deleteDocument, getDocPreview } from "../services/doc.service.js";
+import { db, schema } from "../db/index.js";
+import { eq, and } from "drizzle-orm";
 import { config } from "../config.js";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -90,5 +92,65 @@ export async function docRoutes(app: FastifyInstance) {
     await deleteDocument(kbId, docId);
     logAudit(request.user!.id, "delete_doc", "document", docId).catch(() => {});
     return reply.status(204).send();
+  });
+
+  // 重新处理失败文档
+  app.post("/api/kb/:id/docs/:docId/retry", { preHandler: [requireKBAccess] }, async (request, reply) => {
+    const { docId, id: kbId } = request.params as { docId: string; id: string };
+
+    // 原子操作：仅 error 状态可转为 processing，防止并发重试
+    const [updated] = await db
+      .update(schema.documents)
+      .set({ status: "processing", errorMessage: null, progressStep: "parsing", updatedAt: new Date() })
+      .where(and(eq(schema.documents.id, docId), eq(schema.documents.status, "error")))
+      .returning({ id: schema.documents.id, storagePath: schema.documents.storagePath, fileType: schema.documents.fileType, filename: schema.documents.filename, kbId: schema.documents.kbId });
+
+    if (!updated) {
+      const [doc] = await db.select({ status: schema.documents.status }).from(schema.documents).where(eq(schema.documents.id, docId)).limit(1);
+      if (!doc) {
+        return reply.status(404).send({ success: false, error: { code: "NOT_FOUND", message: "Document not found" } });
+      }
+      return reply.status(409).send({ success: false, error: { code: "NOT_ERROR", message: "Only failed documents can be retried" } });
+    }
+
+    // 清除旧 chunks 和向量
+    try {
+      const { deleteVectors } = await import("../lib/vectordb.js");
+      const oldChunks = await db.select().from(schema.chunks).where(eq(schema.chunks.kbId, updated.kbId));
+      const chunkIds = oldChunks.filter((c) => c.docId === docId).map((c) => `${docId}_${c.chunkIndex}`);
+      if (chunkIds.length > 0) {
+        await deleteVectors(updated.kbId, chunkIds);
+      }
+      await db.delete(schema.chunks).where(eq(schema.chunks.docId, docId));
+    } catch {
+      // 清理失败不阻塞重试
+    }
+
+    // 异步重新处理
+    processDocumentAsync(docId, updated.kbId, updated.storagePath, updated.fileType, updated.filename).catch(() => {});
+
+    return { success: true, data: { docId, status: "processing" } };
+  });
+
+  // 文档处理进度
+  app.get("/api/kb/:id/docs/:docId/progress", { preHandler: [requireKBAccess] }, async (request, reply) => {
+    const { docId } = request.params as { docId: string };
+
+    const [doc] = await db
+      .select({
+        status: schema.documents.status,
+        progressStep: schema.documents.progressStep,
+        errorMessage: schema.documents.errorMessage,
+        chunkCount: schema.documents.chunkCount,
+      })
+      .from(schema.documents)
+      .where(eq(schema.documents.id, docId))
+      .limit(1);
+
+    if (!doc) {
+      return reply.status(404).send({ success: false, error: { code: "NOT_FOUND", message: "Document not found" } });
+    }
+
+    return { success: true, data: doc };
   });
 }

@@ -42,7 +42,7 @@ export async function processDocument(
   return doc.id;
 }
 
-async function processDocumentAsync(
+export async function processDocumentAsync(
   docId: string,
   kbId: string,
   filePath: string,
@@ -50,8 +50,12 @@ async function processDocumentAsync(
   filename: string,
 ): Promise<void> {
   try {
+    await db.update(documents).set({ progressStep: "parsing", updatedAt: new Date() }).where(eq(documents.id, docId));
+
     // 解析文档
     const { text, fileType } = await parseFile(filePath);
+
+    await db.update(documents).set({ progressStep: "splitting", updatedAt: new Date() }).where(eq(documents.id, docId));
 
     // 切分
     const textChunks = splitText(text, { docId, kbId, filename });
@@ -117,6 +121,8 @@ async function processDocumentAsync(
     }
 
     // Embedding（只对新 chunk）
+    await db.update(documents).set({ progressStep: "embedding", updatedAt: new Date() }).where(eq(documents.id, docId));
+
     const texts = chunksToEmbed.map((c) => c.content);
     const vectors = texts.length > 0 ? await embed(texts) : [];
 
@@ -149,19 +155,21 @@ async function processDocumentAsync(
     }
 
     // 写入 BM25 索引（只对新 chunk）
+    await db.update(documents).set({ progressStep: "indexing", updatedAt: new Date() }).where(eq(documents.id, docId));
+
     for (let i = 0; i < chunksToEmbed.length; i++) {
       await indexBM25(kbId, `${docId}_${i}`, chunksToEmbed[i].content);
     }
 
     await db
       .update(documents)
-      .set({ status: "ready", chunkCount: textChunks.length, updatedAt: new Date() })
+      .set({ status: "ready", progressStep: "ready", chunkCount: textChunks.length, updatedAt: new Date() })
       .where(eq(documents.id, docId));
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : "Unknown error";
     await db
       .update(documents)
-      .set({ status: "error", errorMessage, updatedAt: new Date() })
+      .set({ status: "error", errorMessage, progressStep: null, updatedAt: new Date() })
       .where(eq(documents.id, docId));
   }
 }
