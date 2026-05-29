@@ -1,12 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
-import * as echarts from "echarts/core";
-import { LineChart } from "echarts/charts";
-import { GridComponent, TooltipComponent, LegendComponent } from "echarts/components";
-import { CanvasRenderer } from "echarts/renderers";
+import { ref, onMounted, onUnmounted, nextTick } from "vue";
+import * as echarts from "echarts";
 import { api } from "@/lib/api.js";
-
-echarts.use([LineChart, GridComponent, TooltipComponent, LegendComponent, CanvasRenderer]);
 
 const chartRef = ref<HTMLDivElement | null>(null);
 let chart: echarts.ECharts | null = null;
@@ -23,27 +18,27 @@ async function loadTrends(days = 30) {
   try {
     const res = await api.get<TrendsData>(`/admin/trends?days=${days}`);
     data.value = res.data;
+    loading.value = false;
+    await nextTick();
     renderChart();
   } catch {
-    error.value = "加载趋势数据失败";
-  } finally {
     loading.value = false;
+    error.value = "加载趋势数据失败";
   }
 }
 
 function renderChart() {
   if (!chartRef.value) return;
-  if (!chart) {
-    chart = echarts.init(chartRef.value);
-  }
+  if (chart) chart.dispose();
+  chart = echarts.init(chartRef.value);
   chart.setOption({
     tooltip: { trigger: "axis" },
-    legend: { data: ["提问量", "活跃用户"], bottom: 0 },
-    grid: { left: 40, right: 40, top: 20, bottom: 40 },
-    xAxis: { type: "category", data: data.value.days, axisLabel: { rotate: 45, fontSize: 10 } },
+    legend: { data: ["提问量", "活跃用户"], top: 0 },
+    grid: { left: 50, right: 50, top: 30, bottom: 60 },
+    xAxis: { type: "category", data: data.value.days, axisLabel: { rotate: 35, fontSize: 10 } },
     yAxis: [
-      { type: "value", name: "提问量" },
-      { type: "value", name: "活跃用户" },
+      { type: "value", name: "提问量", minInterval: 1 },
+      { type: "value", name: "活跃用户", minInterval: 1 },
     ],
     series: [
       { name: "提问量", type: "line", data: data.value.questions, smooth: true },
@@ -52,10 +47,10 @@ function renderChart() {
   });
 }
 
+function handleResize() { chart?.resize(); }
+
 onMounted(() => { loadTrends(); window.addEventListener("resize", handleResize); });
 onUnmounted(() => { window.removeEventListener("resize", handleResize); chart?.dispose(); chart = null; });
-
-function handleResize() { chart?.resize(); }
 </script>
 
 <template>

@@ -159,15 +159,22 @@ export async function adminRoutes(app: FastifyInstance) {
       .groupBy(sql`DATE(${schema.auditLogs.createdAt})`)
       .orderBy(sql`DATE(${schema.auditLogs.createdAt})`);
 
-    // 构建 30 天完整序列，填充 0
+    // 构建 N 天完整序列，填充 0（用本地日期，与 PG DATE() 对齐）
     const dayMap = new Map<string, { questions: number; activeUsers: number }>();
-    for (let i = 0; i < days; i++) {
+    for (let i = days - 1; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
-      dayMap.set(d.toISOString().slice(0, 10), { questions: 0, activeUsers: 0 });
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      dayMap.set(key, { questions: 0, activeUsers: 0 });
     }
-    for (const r of questionRows) dayMap.get(r.day)!.questions = r.n;
-    for (const r of activeRows) dayMap.get(r.day)!.activeUsers = r.n;
+    for (const r of questionRows) {
+      const slot = dayMap.get(r.day);
+      if (slot) slot.questions = r.n;
+    }
+    for (const r of activeRows) {
+      const slot = dayMap.get(r.day);
+      if (slot) slot.activeUsers = r.n;
+    }
 
     const sorted = Array.from(dayMap.entries())
       .sort(([a], [b]) => a.localeCompare(b));

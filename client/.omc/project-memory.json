@@ -145,9 +145,21 @@
       "type": "file"
     },
     {
+      "path": "src\\lib\\api.ts",
+      "accessCount": 5,
+      "lastAccessed": 1780038940625,
+      "type": "file"
+    },
+    {
       "path": "src\\pages\\SettingsPage.vue",
       "accessCount": 3,
       "lastAccessed": 1779864981499,
+      "type": "file"
+    },
+    {
+      "path": "src\\components\\AdminTrends.vue",
+      "accessCount": 3,
+      "lastAccessed": 1780040803032,
       "type": "file"
     },
     {
@@ -166,12 +178,6 @@
       "path": "package.json",
       "accessCount": 1,
       "lastAccessed": 1779857925981,
-      "type": "file"
-    },
-    {
-      "path": "src\\lib\\api.ts",
-      "accessCount": 1,
-      "lastAccessed": 1779859351213,
       "type": "file"
     },
     {
