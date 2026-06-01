@@ -1,0 +1,1 @@
+ALTER TABLE "knowledge_bases" ADD COLUMN "migration_status" varchar(20) DEFAULT 'ready' NOT NULL;

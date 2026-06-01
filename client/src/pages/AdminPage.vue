@@ -4,6 +4,8 @@ import { api } from "@/lib/api.js";
 import AppLayout from "@/components/AppLayout.vue";
 import AdminTrends from "@/components/AdminTrends.vue";
 import AdminErrorDocs from "@/components/AdminErrorDocs.vue";
+import AdminAIEngine from "@/components/AdminAIEngine.vue";
+import AdminBenchmark from "@/components/AdminBenchmark.vue";
 
 interface User { id: string; username: string; role: string; createdAt: string; }
 interface KB { id: string; name: string; createdBy: string; createdAt: string; docCount: number; convCount: number; }
@@ -13,7 +15,7 @@ interface FeedbackStats { total: number; upCount: number; downCount: number; rat
 
 const users = ref<User[]>([]);
 const kbs = ref<KB[]>([]);
-const tab = ref<"users" | "kbs" | "overview" | "audit" | "feedback" | "trends" | "errors">("overview");
+const tab = ref<"users" | "kbs" | "overview" | "audit" | "feedback" | "trends" | "errors" | "ai-engine">("overview");
 
 const overview = ref<Overview>({ totalUsers: 0, totalKBs: 0, totalDocs: 0, totalConvs: 0, todayQuestions: 0 });
 const auditLogs = ref<AuditLog[]>([]);
@@ -69,6 +71,7 @@ function actionLabel(a: string): string {
         <button :class="{ active: tab === 'feedback' }" @click="tab = 'feedback'; loadFeedback()">反馈概览</button>
         <button :class="{ active: tab === 'trends' }" @click="tab = 'trends'">使用趋势</button>
         <button :class="{ active: tab === 'errors' }" @click="tab = 'errors'">失败文档</button>
+        <button :class="{ active: tab === 'ai-engine' }" @click="tab = 'ai-engine'">AI 引擎</button>
       </div>
 
       <!-- 使用概览 -->
@@ -149,6 +152,12 @@ function actionLabel(a: string): string {
 
       <!-- 失败文档 -->
       <AdminErrorDocs v-if="tab === 'errors'" />
+
+      <!-- AI 引擎 -->
+      <div v-if="tab === 'ai-engine'" class="ai-engine-section">
+        <AdminAIEngine />
+        <AdminBenchmark />
+      </div>
     </div>
   </AppLayout>
 </template>

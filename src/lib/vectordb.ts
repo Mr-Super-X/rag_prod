@@ -4,6 +4,19 @@ import path from "node:path";
 
 let db: lancedb.Connection | null = null;
 
+// 缓存每个 KB 的活跃向量表版本号（从 knowledge_bases.vectorVersion 加载）
+const versionCache = new Map<string, string>();
+
+export function setVectorVersion(kbId: string, version: string): void {
+  versionCache.set(kbId, version);
+}
+
+function fullTableName(kbId: string): string {
+  const base = kbTableName(kbId);
+  const version = versionCache.get(kbId) ?? "";
+  return base + version;
+}
+
 async function getDB(): Promise<lancedb.Connection> {
   if (!db) {
     const dbPath = path.resolve(config.UPLOAD_DIR, "../lancedb");
@@ -19,12 +32,12 @@ export function kbTableName(kbId: string): string {
 async function tableExists(kbId: string): Promise<boolean> {
   const conn = await getDB();
   const tables = await conn.tableNames();
-  return tables.includes(kbTableName(kbId));
+  return tables.includes(fullTableName(kbId));
 }
 
 export async function dropTable(kbId: string): Promise<void> {
   const conn = await getDB();
-  const name = kbTableName(kbId);
+  const name = fullTableName(kbId);
   try {
     await conn.dropTable(name);
   } catch {
@@ -37,16 +50,18 @@ export async function insertVectors(
   vectors: number[][],
   ids: string[],
   payloads: Record<string, unknown>[],
+  tableSuffix?: string,
 ): Promise<void> {
   const conn = await getDB();
-  const name = kbTableName(kbId);
+  const name = fullTableName(kbId) + (tableSuffix ?? "");
   const data = ids.map((id, i) => ({
     id,
     vector: vectors[i],
     ...payloads[i],
   }));
 
-  const exists = await tableExists(kbId);
+  const fullNames = await conn.tableNames();
+  const exists = fullNames.includes(name);
   if (exists) {
     const table = await conn.openTable(name);
     await table.add(data);
@@ -58,7 +73,7 @@ export async function insertVectors(
 export async function deleteVectors(kbId: string, ids: string[]): Promise<void> {
   if (!(await tableExists(kbId))) return;
   const conn = await getDB();
-  const table = await conn.openTable(kbTableName(kbId));
+  const table = await conn.openTable(fullTableName(kbId));
   const predicate = ids.map((id) => `id = '${id}'`).join(" OR ");
   await table.delete(predicate);
 }
@@ -77,7 +92,7 @@ export async function searchVectors(
   if (!(await tableExists(kbId))) return [];
   try {
     const conn = await getDB();
-    const table = await conn.openTable(kbTableName(kbId));
+    const table = await conn.openTable(fullTableName(kbId));
     const results = await table
       .search(queryVector)
       .limit(topK)

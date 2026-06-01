@@ -43,6 +43,20 @@
       "when": 1780024902590,
       "tag": "0005_steep_bloodstorm",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1780277755754,
+      "tag": "0006_flippant_pete_wisdom",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1780279999279,
+      "tag": "0007_jittery_pet_avengers",
+      "breakpoints": true
     }
   ]
 }

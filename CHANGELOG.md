@@ -4,6 +4,86 @@
 
 ---
 
+## V13 — 2026-06-01
+
+### Added
+- AI 引擎配置统一面板：Admin → AI 引擎标签，可视化管理 Embedding/LLM
+- `vector-migration.ts` — 向量迁移引擎（批量 embed→新表→校验→切版本引用）
+- `ai-engine.ts` — 6 个 Admin API 端点（models/config/migrate/progress/benchmark）
+- 迁移期间写保护：upload/retry 返回 503
+- `AdminAIEngine.vue` + `AdminBenchmark.vue` 组件
+- `vectorVersion` 机制：LanceDB 按版本后缀组建表名，迁移后自动切换搜索路径
+
+### Changed
+- `embedder.ts` — `embed()`/`embedSingle()` 新增可选 `modelName` 参数
+- `vectordb.ts` — 新增 `setVectorVersion()` + `fullTableName()` 版本化表名
+- `generator.ts` — Ollama fetch 加 60s `AbortController` 超时
+- `admin.ts` — kbs 端点返回 `migrationStatus`
+
+### Fixed
+- 趋势图空白：loading=false 顺序 + 日期 UTC→本地 + ECharts 全量导入
+
+---
+
+## V12 — 2026-05-29
+
+### Added
+- Admin 使用趋势图 + 失败任务汇聚 + 回答置信度 + 文档分步进度
+- `GET /api/admin/trends`, `GET /api/admin/error-docs`, `POST retry`, `GET progress`
+- `vectorScore` 透传 + 三色置信度标签
+- `AdminTrends.vue` / `AdminErrorDocs.vue` 组件
+
+### Changed
+- `documents.progressStep` 列 + `processDocumentAsync` 5 阶段写入
+- `vitest.config.ts`: `fileParallelism=false` + testTimeout 120s
+- `test.setup.ts`: DROP SCHEMA CASCADE + `migrate()` 建表
+
+### Fixed
+- 5 个集成测试 pg_type 冲突（并行 setup 竞态）
+- Ollama 加载超时挂死（fetchWithTimeout）
+- retry TOCTOU（原子 update+returning）
+
+---
+
+## V11 — 2026-05-27
+
+### Added
+- 消息反馈(👍/👎) + 审计日志 + API Key(HMAC-SHA256) + 使用仪表盘
+- `SettingsPage.vue` API Key 管理
+
+### Changed
+- 对话列表仅在初始加载 + 新对话时刷新
+
+---
+
+## V10 — 2026-05-26
+
+### Added
+- 引用高亮 [N] 点击展开 + 文档预览弹窗 + 对话搜索
+
+---
+
+## V9 — 2026-05-26
+
+### Added
+- 对话导出 Markdown + KB 使用统计
+
+---
+
+## V8 — 2026-05-26
+
+### Added
+- 管理员控制台（用户/KB 管理）
+
+---
+
+## V7 — 2026-05-26
+
+### Added
+- KB 列表分组 + xlsx/pptx 解析
+
+---
+
 ## V6 — 2026-05-26
 
 ### Added

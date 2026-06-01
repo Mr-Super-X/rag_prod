@@ -18,6 +18,10 @@ export function setAccessToken(token: string) {
   accessToken = token;
 }
 
+export function getAccessToken(): string | null {
+  return accessToken;
+}
+
 function clearAuth() {
   accessToken = null;
   localStorage.removeItem("refreshToken");

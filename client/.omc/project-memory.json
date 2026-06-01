@@ -133,6 +133,12 @@
       "type": "file"
     },
     {
+      "path": "src\\components\\AdminAIEngine.vue",
+      "accessCount": 6,
+      "lastAccessed": 1780279295852,
+      "type": "file"
+    },
+    {
       "path": "src\\components\\DocPreviewModal.vue",
       "accessCount": 5,
       "lastAccessed": 1779860793502,

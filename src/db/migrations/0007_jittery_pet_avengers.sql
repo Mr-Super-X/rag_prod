@@ -1,0 +1,1 @@
+ALTER TABLE "knowledge_bases" ADD COLUMN "vector_version" varchar(20) DEFAULT '' NOT NULL;

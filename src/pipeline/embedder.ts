@@ -4,7 +4,8 @@ interface OllamaEmbedResponse {
   embeddings: number[][];
 }
 
-export async function embed(texts: string[]): Promise<number[][]> {
+export async function embed(texts: string[], modelName?: string): Promise<number[][]> {
+  const model = modelName ?? config.EMBEDDING_MODEL;
   // 大批量分小批，避免超时
   const batchSize = 5;
   const allEmbeddings: number[][] = [];
@@ -17,7 +18,7 @@ export async function embed(texts: string[]): Promise<number[][]> {
     const res = await fetch(`${config.OLLAMA_URL}/api/embed`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: config.EMBEDDING_MODEL, input: batch }),
+      body: JSON.stringify({ model, input: batch }),
       signal: controller.signal,
     });
     clearTimeout(timeout);
@@ -33,7 +34,7 @@ export async function embed(texts: string[]): Promise<number[][]> {
   return allEmbeddings;
 }
 
-export async function embedSingle(text: string): Promise<number[]> {
-  const results = await embed([text]);
+export async function embedSingle(text: string, modelName?: string): Promise<number[]> {
+  const results = await embed([text], modelName);
   return results[0];
 }

@@ -63,15 +63,38 @@ describe("embedder", () => {
 
     it("should batch large inputs (batch size 5)", async () => {
       const texts = Array.from({ length: 12 }, (_, i) => `text ${i}`);
-      // 12 texts → 3 batches: 5+5+2
       mockFetch.mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ embeddings: Array.from({ length: 5 }, () => [0.1]) }),
       });
 
       const result = await embed(texts);
-      // 3 batches × 5 = 15, but 12 expected. We get 5 from each mock call
       expect(mockFetch).toHaveBeenCalledTimes(3);
+    });
+
+    it("should pass custom modelName to embed API", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ embeddings: [[0.1, 0.2, 0.3]] }),
+      });
+
+      await embed(["test"], "custom-model");
+      const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(body.model).toBe("custom-model");
+    });
+  });
+
+  describe("embedSingle with modelName", () => {
+    it("should pass custom modelName to embed API", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ embeddings: [[0.5, 0.6]] }),
+      });
+
+      await embedSingle("test", "stella-base");
+      const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(body.model).toBe("stella-base");
+      expect(body.input).toEqual(["test"]);
     });
   });
 });

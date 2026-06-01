@@ -26,6 +26,7 @@ export async function adminRoutes(app: FastifyInstance) {
       name: schema.knowledgeBases.name,
       createdBy: schema.knowledgeBases.createdBy,
       createdAt: schema.knowledgeBases.createdAt,
+      migrationStatus: schema.knowledgeBases.migrationStatus,
     }).from(schema.knowledgeBases).orderBy(schema.knowledgeBases.createdAt);
 
     // 逐 KB 查文档数和对话数

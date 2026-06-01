@@ -14,6 +14,13 @@ export async function docRoutes(app: FastifyInstance) {
   // 上传文档
   app.post("/api/kb/:id/docs", { preHandler: [requireKBAccess] }, async (request, reply) => {
     const { id: kbId } = request.params as { id: string };
+
+    const [kb] = await db.select({ migrationStatus: schema.knowledgeBases.migrationStatus })
+      .from(schema.knowledgeBases).where(eq(schema.knowledgeBases.id, kbId)).limit(1);
+    if (kb?.migrationStatus === "migrating") {
+      return reply.status(503).send({ success: false, error: { code: "KB_MIGRATING", message: "知识库正在向量迁移中，请稍后重试" } });
+    }
+
     const file = await request.file();
 
     if (!file) {
@@ -97,6 +104,12 @@ export async function docRoutes(app: FastifyInstance) {
   // 重新处理失败文档
   app.post("/api/kb/:id/docs/:docId/retry", { preHandler: [requireKBAccess] }, async (request, reply) => {
     const { docId, id: kbId } = request.params as { docId: string; id: string };
+
+    const [kb] = await db.select({ migrationStatus: schema.knowledgeBases.migrationStatus })
+      .from(schema.knowledgeBases).where(eq(schema.knowledgeBases.id, kbId)).limit(1);
+    if (kb?.migrationStatus === "migrating") {
+      return reply.status(503).send({ success: false, error: { code: "KB_MIGRATING", message: "知识库正在向量迁移中，请稍后重试" } });
+    }
 
     // 原子操作：仅 error 状态可转为 processing，防止并发重试
     const [updated] = await db

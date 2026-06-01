@@ -29,6 +29,8 @@ export const knowledgeBases = pgTable(
       .references(() => users.id),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    migrationStatus: varchar("migration_status", { length: 20 }).notNull().default("ready"),
+    vectorVersion: varchar("vector_version", { length: 20 }).notNull().default(""),
   },
 );
 
