@@ -6,6 +6,7 @@ import AdminTrends from "@/components/AdminTrends.vue";
 import AdminErrorDocs from "@/components/AdminErrorDocs.vue";
 import AdminAIEngine from "@/components/AdminAIEngine.vue";
 import AdminBenchmark from "@/components/AdminBenchmark.vue";
+import AdminPerf from "@/components/AdminPerf.vue";
 
 interface User { id: string; username: string; role: string; createdAt: string; }
 interface KB { id: string; name: string; createdBy: string; createdAt: string; docCount: number; convCount: number; }
@@ -15,7 +16,7 @@ interface FeedbackStats { total: number; upCount: number; downCount: number; rat
 
 const users = ref<User[]>([]);
 const kbs = ref<KB[]>([]);
-const tab = ref<"users" | "kbs" | "overview" | "audit" | "feedback" | "trends" | "errors" | "ai-engine">("overview");
+const tab = ref<"users" | "kbs" | "overview" | "audit" | "feedback" | "trends" | "errors" | "ai-engine" | "perf">("overview");
 
 const overview = ref<Overview>({ totalUsers: 0, totalKBs: 0, totalDocs: 0, totalConvs: 0, todayQuestions: 0 });
 const auditLogs = ref<AuditLog[]>([]);
@@ -72,6 +73,7 @@ function actionLabel(a: string): string {
         <button :class="{ active: tab === 'trends' }" @click="tab = 'trends'">使用趋势</button>
         <button :class="{ active: tab === 'errors' }" @click="tab = 'errors'">失败文档</button>
         <button :class="{ active: tab === 'ai-engine' }" @click="tab = 'ai-engine'">AI 引擎</button>
+        <button :class="{ active: tab === 'perf' }" @click="tab = 'perf'">性能</button>
       </div>
 
       <!-- 使用概览 -->
@@ -158,6 +160,9 @@ function actionLabel(a: string): string {
         <AdminAIEngine />
         <AdminBenchmark />
       </div>
+
+      <!-- 性能 -->
+      <AdminPerf v-if="tab === 'perf'" />
     </div>
   </AppLayout>
 </template>

@@ -289,27 +289,33 @@
       "type": "file"
     },
     {
+      "path": "src\\db\\schema.ts",
+      "accessCount": 41,
+      "lastAccessed": 1780309091875,
+      "type": "file"
+    },
+    {
       "path": "README.md",
       "accessCount": 40,
       "lastAccessed": 1779871386134,
       "type": "file"
     },
     {
-      "path": "src\\db\\schema.ts",
-      "accessCount": 39,
-      "lastAccessed": 1780279871583,
-      "type": "file"
-    },
-    {
       "path": "src\\routes\\doc.ts",
-      "accessCount": 36,
-      "lastAccessed": 1780277853352,
+      "accessCount": 40,
+      "lastAccessed": 1780305847032,
       "type": "file"
     },
     {
       "path": "src\\pipeline\\generator.ts",
-      "accessCount": 32,
-      "lastAccessed": 1780277642683,
+      "accessCount": 37,
+      "lastAccessed": 1780310618685,
+      "type": "file"
+    },
+    {
+      "path": "src\\services\\chat.service.ts",
+      "accessCount": 34,
+      "lastAccessed": 1780309077510,
       "type": "file"
     },
     {
@@ -320,8 +326,8 @@
     },
     {
       "path": "src\\config.ts",
-      "accessCount": 29,
-      "lastAccessed": 1780277618477,
+      "accessCount": 30,
+      "lastAccessed": 1780308908806,
       "type": "file"
     },
     {
@@ -331,9 +337,9 @@
       "type": "file"
     },
     {
-      "path": "src\\services\\chat.service.ts",
-      "accessCount": 25,
-      "lastAccessed": 1780277654805,
+      "path": "src\\pipeline\\reranker.ts",
+      "accessCount": 26,
+      "lastAccessed": 1780310155373,
       "type": "file"
     },
     {
@@ -368,8 +374,8 @@
     },
     {
       "path": "docs\\AGENTS.md",
-      "accessCount": 19,
-      "lastAccessed": 1779877209894,
+      "accessCount": 20,
+      "lastAccessed": 1780308747905,
       "type": "file"
     },
     {
@@ -380,8 +386,8 @@
     },
     {
       "path": "src\\services\\retrieval.service.ts",
-      "accessCount": 17,
-      "lastAccessed": 1780277654173,
+      "accessCount": 18,
+      "lastAccessed": 1780304099249,
       "type": "file"
     },
     {
@@ -397,21 +403,15 @@
       "type": "file"
     },
     {
-      "path": "src\\pipeline\\reranker.ts",
+      "path": "vitest.config.ts",
       "accessCount": 12,
-      "lastAccessed": 1780042427626,
+      "lastAccessed": 1780310633133,
       "type": "file"
     },
     {
       "path": "src\\pipeline\\embedder.ts",
       "accessCount": 11,
       "lastAccessed": 1780279835758,
-      "type": "file"
-    },
-    {
-      "path": "vitest.config.ts",
-      "accessCount": 10,
-      "lastAccessed": 1780035069882,
       "type": "file"
     },
     {
@@ -434,8 +434,8 @@
     },
     {
       "path": "package.json",
-      "accessCount": 7,
-      "lastAccessed": 1780027633802,
+      "accessCount": 8,
+      "lastAccessed": 1780308695466,
       "type": "file"
     },
     {
@@ -457,15 +457,15 @@
       "type": "file"
     },
     {
-      "path": "src\\pipeline\\splitter.ts",
-      "accessCount": 4,
-      "lastAccessed": 1779874780398,
+      "path": "src\\lib\\redis.ts",
+      "accessCount": 6,
+      "lastAccessed": 1780305693357,
       "type": "file"
     },
     {
-      "path": "src\\lib\\redis.ts",
+      "path": "src\\pipeline\\splitter.ts",
       "accessCount": 4,
-      "lastAccessed": 1779874801949,
+      "lastAccessed": 1779874780398,
       "type": "file"
     },
     {

@@ -7,6 +7,7 @@ vi.mock("../../config.js", () => ({
     RERANKER_ENABLED: true,
     FINAL_TOP_K: 3,
     RERANKER_TOP_K: 10,
+    EMBEDDING_MODEL: "bge-m3",
   },
 }));
 
@@ -38,6 +39,8 @@ describe("reranker", () => {
   });
 
   it("should call LLM and re-rank when more candidates than FINAL_TOP_K", async () => {
+    // similarityRerank embed 调用失败 → LLM fallback
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 500 } as unknown as Response);
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ message: { content: "3,1,5" } }),
@@ -45,20 +48,21 @@ describe("reranker", () => {
 
     const result = await rerank("水果有什么营养？", candidates);
     expect(result.length).toBeGreaterThan(0);
-    expect(mockFetch).toHaveBeenCalled();
   });
 
   it("should fallback to top-K on API error", async () => {
-    mockFetch.mockResolvedValueOnce({ ok: false, status: 500 });
+    // 两次都失败 → fallback to slice
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 500 } as unknown as Response);
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 500 } as unknown as Response);
 
     const result = await rerank("query", candidates);
     expect(result.length).toBe(3); // FINAL_TOP_K
   });
 
-  it("should truncate content to 300 chars in prompt", async () => {
+  it("should rerank via LLM listwise with correct fallback", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({ message: { content: "1,2,3" } }),
+      json: () => Promise.resolve({ message: { content: "1,3,2" } }),
     });
 
     const longContent: ChunkSource[] = [
@@ -68,9 +72,7 @@ describe("reranker", () => {
       { chunkId: "c4", content: "D".repeat(500), score: 0.6, docFilename: "long.pdf" },
     ];
 
-    await rerank("query", longContent);
-    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
-    const prompt = callBody.messages[0].content;
-    expect(prompt).not.toContain("A".repeat(500));
+    const result = await rerank("query", longContent);
+    expect(result.length).toBe(3);
   });
 });

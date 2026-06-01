@@ -4,6 +4,7 @@ import { logAudit } from "../lib/audit.js";
 import { processDocument, processDocumentAsync, listDocuments, deleteDocument, getDocPreview } from "../services/doc.service.js";
 import { db, schema } from "../db/index.js";
 import { eq, and } from "drizzle-orm";
+import { invalidateKB } from "../lib/cache.js";
 import { config } from "../config.js";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -62,7 +63,7 @@ export async function docRoutes(app: FastifyInstance) {
     );
 
     logAudit(request.user!.id, "upload_doc", "document", docId).catch(() => {});
-
+    invalidateKB(kbId).catch(() => {});
     return reply.status(201).send({
       success: true,
       data: { id: docId, filename: file.filename, status: "processing", chunkCount: 0 },
@@ -98,6 +99,7 @@ export async function docRoutes(app: FastifyInstance) {
     const { id: kbId, docId } = request.params as { id: string; docId: string };
     await deleteDocument(kbId, docId);
     logAudit(request.user!.id, "delete_doc", "document", docId).catch(() => {});
+    invalidateKB(kbId).catch(() => {});
     return reply.status(204).send();
   });
 

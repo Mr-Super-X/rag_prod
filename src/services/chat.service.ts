@@ -2,6 +2,7 @@ import { config } from "../config.js";
 import { retrieve } from "./retrieval.service.js";
 import { generate, streamGenerate, rewriteQuestion } from "../pipeline/generator.js";
 import { detectAndExecute } from "../pipeline/agent.js";
+import { getCachedAnswer, setCachedAnswer, recordHit, recordMiss } from "../lib/cache.js";
 import {
   createConversation,
   getConversation,
@@ -102,6 +103,17 @@ export async function ask(
     return { answer, sources: [], conversationId: convId };
   }
 
+  // 缓存检查（仅首轮对话）
+  if (history.length === 0) {
+    const cached = await getCachedAnswer(kbId, question, config.EMBEDDING_MODEL);
+    if (cached) {
+      recordHit();
+      await addMessage(convId, "assistant", cached.answer, cached.sources);
+      return { answer: cached.answer, sources: cached.sources, conversationId: convId };
+    }
+    recordMiss();
+  }
+
   // 检索
   const sources = await retrieve(kbId, rewrittenQuestion);
 
@@ -127,6 +139,11 @@ export async function ask(
 
   // 保存回答
   await addMessage(convId, "assistant", answer, sources);
+
+  // 缓存新回答
+  if (history.length === 0) {
+    setCachedAnswer(kbId, question, config.EMBEDDING_MODEL, answer, sources).catch(() => {});
+  }
 
   // 自动更新对话标题
   if (history.length <= 2) {

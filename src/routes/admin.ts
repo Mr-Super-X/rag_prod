@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { authenticate, requireAdmin } from "../middleware/auth.js";
 import { logAudit } from "../lib/audit.js";
+import { getCacheStats } from "../lib/cache.js";
 import { db, schema } from "../db/index.js";
 import { eq, count, desc, gte, and, sql } from "drizzle-orm";
 
@@ -210,5 +211,11 @@ export async function adminRoutes(app: FastifyInstance) {
       .limit(100);
 
     return { success: true, data: errorDocs };
+  });
+
+  // 性能统计
+  app.get("/api/admin/perf-stats", async () => {
+    const stats = getCacheStats();
+    return { success: true, data: stats };
   });
 }

@@ -101,7 +101,7 @@ async function ollamaChat(messages: ChatMessage[]): Promise<string> {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ model: config.LLM_MODEL, messages, stream: false, options: { temperature: 0.3, num_predict: 1024 } }),
-  }, 60000);
+  }, 180000);
   if (!res.ok) throw new Error(`Ollama chat failed: ${res.status}`);
   const data = await res.json() as { message: { content: string } };
   return data.message.content;
@@ -112,7 +112,7 @@ async function* ollamaStream(messages: ChatMessage[]): AsyncGenerator<string> {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ model: config.LLM_MODEL, messages, stream: true, options: { temperature: 0.3, num_predict: 1024 } }),
-  }, 60000);
+  }, 180000);
   if (!res.ok) throw new Error(`Ollama stream failed: ${res.status}`);
   const reader = res.body!.getReader();
   const decoder = new TextDecoder();
@@ -178,7 +178,7 @@ ${contextLines}
       stream: false,
       options: { temperature: 0.1, num_predict: 100 },
     }),
-  }, 30000);
+  }, 60000);
 
   if (!res.ok) return question; // 降级：失败则返回原始问题
 
