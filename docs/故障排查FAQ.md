@@ -235,3 +235,39 @@ curl -X POST http://localhost:3000/api/kb/{kbId}/chat \\
 
 注意：API Key 端点也支持 JWT（原有的 `Authorization: Bearer <jwt>` 仍然可用）。
 ```
+
+---
+
+## V14 常见问题
+
+### Q: 对话时页面显示 "This operation was aborted"
+
+**现象**：提问后等待一段时间，页面输出 "This operation was aborted"，无回答。
+
+**原因**：CPU Ollama 加载大模型（Qwen2.5:7B 约 4.7GB）首次推理或模型未预热时，加载时间可能超过 60 秒。`generator.ts` 的 `fetchWithTimeout` 超时后 `AbortController` 触发 abort，Fastyfiy 向上传播 `AbortError`。
+
+**修复**（V14.1）：
+1. `ollamaChat`/`ollamaStream` 超时从 60s 扩大到 180s
+2. `reranker.ts` 禁用 `similarityRerank`（CPU embed 批量调用延迟不可控），直接走 LLM listwise 精排
+3. `vitest.config.ts` testTimeout 120s→300s
+
+**预防**：首次提问前运行 `ollama run qwen2.5:7b "hello"` 预热模型。
+
+### Q: 缓存命中率始终为 0
+
+**现象**：Admin → 性能标签显示缓存命中率 0%。
+
+**原因**：缓存 key 包含 Embedding 模型名（`EMBEDDING_MODEL`）。如果切换过模型，旧缓存 key 不再匹配。
+
+**解决**：正常现象。新模型下首次提问走完整 RAG 链路并新建缓存，后续重复提问会命中。
+
+### Q: 向量迁移中途崩溃如何恢复
+
+**现象**：Admin → AI 引擎发起迁移后进程崩溃，KB 卡在 `migrating` 状态。
+
+**解决**：
+```sql
+-- 手动重置迁移状态
+UPDATE knowledge_bases SET migration_status = 'failed' WHERE migration_status = 'migrating';
+```
+然后重新发起迁移。`rollbackMigration()` 会自动清理残留的新表。
