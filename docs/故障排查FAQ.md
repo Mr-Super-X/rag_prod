@@ -244,7 +244,7 @@ curl -X POST http://localhost:3000/api/kb/{kbId}/chat \\
 
 **现象**：提问后等待一段时间，页面输出 "This operation was aborted"，无回答。
 
-**原因**：CPU Ollama 加载大模型（Qwen2.5:7B 约 4.7GB）首次推理或模型未预热时，加载时间可能超过 60 秒。`generator.ts` 的 `fetchWithTimeout` 超时后 `AbortController` 触发 abort，Fastyfiy 向上传播 `AbortError`。
+**原因**：CPU Ollama 加载大模型（Qwen2.5:7B 约 4.7GB）首次推理或模型未预热时，加载时间可能超过 60 秒。`generator.ts` 的 `fetchWithTimeout` 超时后 `AbortController` 触发 abort，Fastify 向上传播 `AbortError`。
 
 **修复**（V14.1）：
 1. `ollamaChat`/`ollamaStream` 超时从 60s 扩大到 180s

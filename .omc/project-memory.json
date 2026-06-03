@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1780021570907,
+  "lastScanned": 1780452702107,
   "projectRoot": "D:\\personal\\AI\\rag_prod",
   "techStack": {
     "languages": [
@@ -107,7 +107,7 @@
       "path": "client",
       "purpose": null,
       "fileCount": 7,
-      "lastAccessed": 1780021570860,
+      "lastAccessed": 1780452702078,
       "keyFiles": [
         "AGENTS.md",
         "env.d.ts",
@@ -120,7 +120,7 @@
       "path": "data",
       "purpose": "Data files",
       "fileCount": 2,
-      "lastAccessed": 1780021570860,
+      "lastAccessed": 1780452702079,
       "keyFiles": [
         "test-doc.md",
         "test-upload.md"
@@ -129,8 +129,8 @@
     "docs": {
       "path": "docs",
       "purpose": "Documentation",
-      "fileCount": 14,
-      "lastAccessed": 1780021570870,
+      "fileCount": 15,
+      "lastAccessed": 1780452702084,
       "keyFiles": [
         "AGENTS.md",
         "产品概述与定位.md",
@@ -143,7 +143,7 @@
       "path": "exports",
       "purpose": null,
       "fileCount": 4,
-      "lastAccessed": 1780021570871,
+      "lastAccessed": 1780452702085,
       "keyFiles": [
         "ollama-latest.tar",
         "ollama-models.tar.gz",
@@ -154,17 +154,20 @@
     "logs": {
       "path": "logs",
       "purpose": null,
-      "fileCount": 1,
-      "lastAccessed": 1780021570872,
+      "fileCount": 4,
+      "lastAccessed": 1780452702086,
       "keyFiles": [
-        "app-2026-05-27.log"
+        "app-2026-05-27.log",
+        "app-2026-05-29.log",
+        "app-2026-06-01.log",
+        "app-2026-06-02.log"
       ]
     },
     "scripts": {
       "path": "scripts",
       "purpose": "Build/utility scripts",
       "fileCount": 3,
-      "lastAccessed": 1780021570872,
+      "lastAccessed": 1780452702086,
       "keyFiles": [
         "AGENTS.md",
         "backup.ts",
@@ -175,7 +178,7 @@
       "path": "src",
       "purpose": "Source code",
       "fileCount": 5,
-      "lastAccessed": 1780021570872,
+      "lastAccessed": 1780452702087,
       "keyFiles": [
         "AGENTS.md",
         "app.ts",
@@ -187,8 +190,8 @@
     "test": {
       "path": "test",
       "purpose": "Test files",
-      "fileCount": 8,
-      "lastAccessed": 1780021570873,
+      "fileCount": 10,
+      "lastAccessed": 1780452702088,
       "keyFiles": [
         "admin.test.ts",
         "AGENTS.md",
@@ -201,7 +204,7 @@
       "path": "client\\dist",
       "purpose": "Distribution/build output",
       "fileCount": 1,
-      "lastAccessed": 1780021570874,
+      "lastAccessed": 1780452702089,
       "keyFiles": [
         "index.html"
       ]
@@ -210,21 +213,21 @@
       "path": "client\\node_modules",
       "purpose": "Dependencies",
       "fileCount": 1,
-      "lastAccessed": 1780021570874,
+      "lastAccessed": 1780452702089,
       "keyFiles": []
     },
     "client\\public": {
       "path": "client\\public",
       "purpose": "Public files",
       "fileCount": 0,
-      "lastAccessed": 1780021570875,
+      "lastAccessed": 1780452702090,
       "keyFiles": []
     },
     "client\\src": {
       "path": "client\\src",
       "purpose": "Source code",
       "fileCount": 4,
-      "lastAccessed": 1780021570875,
+      "lastAccessed": 1780452702090,
       "keyFiles": [
         "AGENTS.md",
         "App.vue",
@@ -234,19 +237,19 @@
     "src\\lib": {
       "path": "src\\lib",
       "purpose": "Library code",
-      "fileCount": 6,
-      "lastAccessed": 1780021570877,
+      "fileCount": 8,
+      "lastAccessed": 1780452702092,
       "keyFiles": [
         "AGENTS.md",
         "audit.ts",
-        "errors.ts"
+        "cache.ts"
       ]
     },
     "src\\middleware": {
       "path": "src\\middleware",
       "purpose": "Middleware",
       "fileCount": 2,
-      "lastAccessed": 1780021570878,
+      "lastAccessed": 1780452702093,
       "keyFiles": [
         "AGENTS.md",
         "auth.ts"
@@ -255,19 +258,19 @@
     "src\\routes": {
       "path": "src\\routes",
       "purpose": "Route handlers",
-      "fileCount": 6,
-      "lastAccessed": 1780021570878,
+      "fileCount": 7,
+      "lastAccessed": 1780452702094,
       "keyFiles": [
         "admin.ts",
         "AGENTS.md",
-        "auth.ts"
+        "ai-engine.ts"
       ]
     },
     "src\\services": {
       "path": "src\\services",
       "purpose": "Business logic services",
       "fileCount": 7,
-      "lastAccessed": 1780021570879,
+      "lastAccessed": 1780452702094,
       "keyFiles": [
         "AGENTS.md",
         "auth.service.ts",
@@ -277,304 +280,304 @@
   },
   "hotPaths": [
     {
+      "path": "",
+      "accessCount": 10,
+      "lastAccessed": 1780453411212,
+      "type": "directory"
+    },
+    {
+      "path": "docs\\功能清单.md",
+      "accessCount": 10,
+      "lastAccessed": 1780454085302,
+      "type": "file"
+    },
+    {
+      "path": "docs\\架构设计与实现细节.md",
+      "accessCount": 9,
+      "lastAccessed": 1780453467210,
+      "type": "file"
+    },
+    {
+      "path": "docs\\迭代开发全记录.md",
+      "accessCount": 9,
+      "lastAccessed": 1780453536685,
+      "type": "file"
+    },
+    {
+      "path": "src",
+      "accessCount": 8,
+      "lastAccessed": 1780454097046,
+      "type": "directory"
+    },
+    {
       "path": "CLAUDE.md",
-      "accessCount": 51,
-      "lastAccessed": 1779875956426,
-      "type": "file"
-    },
-    {
-      "path": "src\\routes\\chat.ts",
-      "accessCount": 42,
-      "lastAccessed": 1780277635492,
-      "type": "file"
-    },
-    {
-      "path": "src\\db\\schema.ts",
-      "accessCount": 41,
-      "lastAccessed": 1780309091875,
-      "type": "file"
-    },
-    {
-      "path": "README.md",
-      "accessCount": 40,
-      "lastAccessed": 1779871386134,
-      "type": "file"
-    },
-    {
-      "path": "src\\routes\\doc.ts",
-      "accessCount": 40,
-      "lastAccessed": 1780305847032,
-      "type": "file"
-    },
-    {
-      "path": "src\\pipeline\\generator.ts",
-      "accessCount": 37,
-      "lastAccessed": 1780310618685,
-      "type": "file"
-    },
-    {
-      "path": "src\\services\\chat.service.ts",
-      "accessCount": 34,
-      "lastAccessed": 1780309077510,
-      "type": "file"
-    },
-    {
-      "path": "src\\middleware\\auth.ts",
-      "accessCount": 32,
-      "lastAccessed": 1780281484282,
+      "accessCount": 7,
+      "lastAccessed": 1780453534790,
       "type": "file"
     },
     {
       "path": "src\\config.ts",
-      "accessCount": 30,
-      "lastAccessed": 1780308908806,
+      "accessCount": 6,
+      "lastAccessed": 1780454865877,
       "type": "file"
     },
     {
       "path": "src\\routes\\kb.ts",
-      "accessCount": 28,
-      "lastAccessed": 1780043458996,
-      "type": "file"
+      "accessCount": 5,
+      "lastAccessed": 1780453352354,
+      "type": "directory"
     },
     {
       "path": "src\\pipeline\\reranker.ts",
-      "accessCount": 26,
-      "lastAccessed": 1780310155373,
+      "accessCount": 5,
+      "lastAccessed": 1780454109249,
+      "type": "directory"
+    },
+    {
+      "path": "docs\\故障排查FAQ.md",
+      "accessCount": 4,
+      "lastAccessed": 1780453381133,
       "type": "file"
     },
     {
-      "path": "src\\app.ts",
-      "accessCount": 25,
-      "lastAccessed": 1780277804124,
+      "path": "docs\\测试策略.md",
+      "accessCount": 4,
+      "lastAccessed": 1780453440568,
       "type": "file"
     },
     {
-      "path": "src\\services\\kb.service.ts",
-      "accessCount": 24,
-      "lastAccessed": 1780043460192,
+      "path": "docs\\术语表.md",
+      "accessCount": 4,
+      "lastAccessed": 1780454085219,
       "type": "file"
     },
     {
-      "path": "src\\routes\\auth.ts",
-      "accessCount": 23,
-      "lastAccessed": 1780281124000,
-      "type": "file"
-    },
-    {
-      "path": "src\\services\\doc.service.ts",
-      "accessCount": 21,
-      "lastAccessed": 1780042592565,
-      "type": "file"
-    },
-    {
-      "path": "src\\lib\\vectordb.ts",
-      "accessCount": 20,
-      "lastAccessed": 1780279919715,
-      "type": "file"
-    },
-    {
-      "path": "docs\\AGENTS.md",
-      "accessCount": 20,
-      "lastAccessed": 1780308747905,
-      "type": "file"
-    },
-    {
-      "path": "test\\setup.ts",
-      "accessCount": 19,
-      "lastAccessed": 1780035125553,
-      "type": "file"
-    },
-    {
-      "path": "src\\services\\retrieval.service.ts",
-      "accessCount": 18,
-      "lastAccessed": 1780304099249,
-      "type": "file"
-    },
-    {
-      "path": "client\\src\\lib\\api.ts",
-      "accessCount": 14,
-      "lastAccessed": 1780278622012,
-      "type": "file"
-    },
-    {
-      "path": "src\\pipeline\\parser.ts",
-      "accessCount": 13,
-      "lastAccessed": 1779876844064,
-      "type": "file"
-    },
-    {
-      "path": "vitest.config.ts",
-      "accessCount": 12,
-      "lastAccessed": 1780310633133,
-      "type": "file"
-    },
-    {
-      "path": "src\\pipeline\\embedder.ts",
-      "accessCount": 11,
-      "lastAccessed": 1780279835758,
-      "type": "file"
-    },
-    {
-      "path": "src\\types.ts",
-      "accessCount": 10,
-      "lastAccessed": 1780043454091,
-      "type": "file"
-    },
-    {
-      "path": "src\\services\\context.service.ts",
-      "accessCount": 9,
-      "lastAccessed": 1780023371285,
-      "type": "file"
-    },
-    {
-      "path": "client\\src\\router\\index.ts",
-      "accessCount": 8,
-      "lastAccessed": 1780023386958,
+      "path": "src\\db\\schema.ts",
+      "accessCount": 3,
+      "lastAccessed": 1780453153090,
       "type": "file"
     },
     {
       "path": "package.json",
-      "accessCount": 8,
-      "lastAccessed": 1780308695466,
+      "accessCount": 3,
+      "lastAccessed": 1780453155118,
       "type": "file"
     },
     {
-      "path": "src\\lib\\errors.ts",
-      "accessCount": 7,
-      "lastAccessed": 1780042437201,
+      "path": "src\\routes\\admin.ts",
+      "accessCount": 3,
+      "lastAccessed": 1780453340184,
+      "type": "directory"
+    },
+    {
+      "path": "docs\\产品概述与定位.md",
+      "accessCount": 3,
+      "lastAccessed": 1780453382096,
       "type": "file"
     },
     {
-      "path": "src\\db\\index.ts",
-      "accessCount": 6,
-      "lastAccessed": 1780277636205,
+      "path": "docs\\用户指南-从登录到精通.md",
+      "accessCount": 3,
+      "lastAccessed": 1780453383695,
       "type": "file"
     },
     {
-      "path": "src\\services\\auth.service.ts",
-      "accessCount": 6,
-      "lastAccessed": 1780281109049,
+      "path": "docs\\权限模型说明.md",
+      "accessCount": 3,
+      "lastAccessed": 1780453386317,
       "type": "file"
     },
     {
-      "path": "src\\lib\\redis.ts",
-      "accessCount": 6,
-      "lastAccessed": 1780305693357,
+      "path": "client\\src\\pages\\AdminPage.vue",
+      "accessCount": 3,
+      "lastAccessed": 1780453497641,
       "type": "file"
     },
     {
-      "path": "src\\pipeline\\splitter.ts",
-      "accessCount": 4,
-      "lastAccessed": 1779874780398,
+      "path": "docs\\AGENTS.md",
+      "accessCount": 3,
+      "lastAccessed": 1780453537639,
       "type": "file"
     },
     {
-      "path": "client\\src\\stores\\auth.ts",
-      "accessCount": 4,
-      "lastAccessed": 1779874814332,
+      "path": "src\\lib\\cache.ts",
+      "accessCount": 3,
+      "lastAccessed": 1780454104198,
+      "type": "file"
+    },
+    {
+      "path": "src\\services\\doc.service.ts",
+      "accessCount": 3,
+      "lastAccessed": 1780456009825,
+      "type": "directory"
+    },
+    {
+      "path": "docs\\数据库设计文档.md",
+      "accessCount": 2,
+      "lastAccessed": 1780453274278,
+      "type": "file"
+    },
+    {
+      "path": "src\\app.ts",
+      "accessCount": 2,
+      "lastAccessed": 1780453281039,
+      "type": "file"
+    },
+    {
+      "path": "src\\services\\kb.service.ts",
+      "accessCount": 2,
+      "lastAccessed": 1780453309731,
+      "type": "file"
+    },
+    {
+      "path": "docs\\小白部署指南-从本地到上线.md",
+      "accessCount": 2,
+      "lastAccessed": 1780453439450,
+      "type": "file"
+    },
+    {
+      "path": "docs\\技术栈速查清单.md",
+      "accessCount": 2,
+      "lastAccessed": 1780454084497,
+      "type": "file"
+    },
+    {
+      "path": "src\\services\\retrieval.service.ts",
+      "accessCount": 2,
+      "lastAccessed": 1780454103067,
+      "type": "file"
+    },
+    {
+      "path": "src\\middleware\\auth.ts",
+      "accessCount": 2,
+      "lastAccessed": 1780454108692,
+      "type": "file"
+    },
+    {
+      "path": "src\\pipeline\\generator.ts",
+      "accessCount": 2,
+      "lastAccessed": 1780454865258,
+      "type": "file"
+    },
+    {
+      "path": "docs\\企业级RAG知识库架构设计与落地.md",
+      "accessCount": 1,
+      "lastAccessed": 1780453047031,
       "type": "file"
     },
     {
       "path": "docker-compose.yml",
-      "accessCount": 4,
-      "lastAccessed": 1780020768901,
-      "type": "file"
-    },
-    {
-      "path": "docker-compose.mac.yml",
-      "accessCount": 3,
-      "lastAccessed": 1779871402134,
+      "accessCount": 1,
+      "lastAccessed": 1780453070985,
       "type": "file"
     },
     {
       "path": "ecosystem.config.cjs",
-      "accessCount": 3,
-      "lastAccessed": 1779871409073,
-      "type": "file"
-    },
-    {
-      "path": "src\\AGENTS.md",
-      "accessCount": 3,
-      "lastAccessed": 1779874233373,
-      "type": "file"
-    },
-    {
-      "path": "test\\AGENTS.md",
-      "accessCount": 3,
-      "lastAccessed": 1779874248527,
-      "type": "file"
-    },
-    {
-      "path": "src\\server.ts",
-      "accessCount": 3,
-      "lastAccessed": 1779874802337,
-      "type": "file"
-    },
-    {
-      "path": "client\\src\\composables\\useAsync.ts",
-      "accessCount": 2,
-      "lastAccessed": 1779872546628,
-      "type": "file"
-    },
-    {
-      "path": "drizzle.config.ts",
-      "accessCount": 2,
-      "lastAccessed": 1780027656580,
-      "type": "file"
-    },
-    {
-      "path": "tsconfig.json",
       "accessCount": 1,
-      "lastAccessed": 1779795261344,
+      "lastAccessed": 1780453071579,
       "type": "file"
     },
     {
-      "path": "scripts\\seed.ts",
+      "path": "client\\package.json",
       "accessCount": 1,
-      "lastAccessed": 1779795936358,
+      "lastAccessed": 1780453073534,
       "type": "file"
     },
     {
-      "path": "AGENTS.md",
+      "path": "client\\vite.config.ts",
       "accessCount": 1,
-      "lastAccessed": 1779795961927,
+      "lastAccessed": 1780453074019,
       "type": "file"
     },
     {
-      "path": "client\\AGENTS.md",
+      "path": "docs\\环境变量参考.md",
       "accessCount": 1,
-      "lastAccessed": 1779795983747,
+      "lastAccessed": 1780453079304,
       "type": "file"
     },
     {
-      "path": "scripts\\AGENTS.md",
+      "path": "client\\src\\components\\AdminAIEngine.vue",
       "accessCount": 1,
-      "lastAccessed": 1779795996143,
+      "lastAccessed": 1780453084644,
       "type": "file"
     },
     {
-      "path": "client\\src\\AGENTS.md",
+      "path": "client\\src\\components\\AdminBenchmark.vue",
       "accessCount": 1,
-      "lastAccessed": 1779796008978,
+      "lastAccessed": 1780453085559,
       "type": "file"
     },
     {
-      "path": "client\\src\\components\\AGENTS.md",
+      "path": "client\\src\\components\\AdminErrorDocs.vue",
       "accessCount": 1,
-      "lastAccessed": 1779796015110,
+      "lastAccessed": 1780453086466,
       "type": "file"
     },
     {
-      "path": "client\\src\\composables\\AGENTS.md",
+      "path": "client\\src\\components\\AdminPerf.vue",
       "accessCount": 1,
-      "lastAccessed": 1779796018966,
+      "lastAccessed": 1780453087231,
       "type": "file"
     },
     {
-      "path": "client\\src\\lib\\AGENTS.md",
+      "path": "client\\src\\components\\AdminTrends.vue",
       "accessCount": 1,
-      "lastAccessed": 1779796025036,
+      "lastAccessed": 1780453087903,
       "type": "file"
+    },
+    {
+      "path": "src\\routes\\ai-engine.ts",
+      "accessCount": 1,
+      "lastAccessed": 1780453088623,
+      "type": "file"
+    },
+    {
+      "path": "client\\src",
+      "accessCount": 1,
+      "lastAccessed": 1780453101677,
+      "type": "directory"
+    },
+    {
+      "path": "src\\routes\\auth.ts",
+      "accessCount": 1,
+      "lastAccessed": 1780453102301,
+      "type": "file"
+    },
+    {
+      "path": "src\\types.ts",
+      "accessCount": 1,
+      "lastAccessed": 1780453119637,
+      "type": "file"
+    },
+    {
+      "path": "client\\src\\components\\MessageBubble.vue",
+      "accessCount": 1,
+      "lastAccessed": 1780453143656,
+      "type": "file"
+    },
+    {
+      "path": "src\\routes\\chat.ts",
+      "accessCount": 1,
+      "lastAccessed": 1780453161861,
+      "type": "directory"
+    },
+    {
+      "path": "src\\routes\\doc.ts",
+      "accessCount": 1,
+      "lastAccessed": 1780453162860,
+      "type": "directory"
+    },
+    {
+      "path": "docker-compose.mac.yml",
+      "accessCount": 1,
+      "lastAccessed": 1780453167980,
+      "type": "file"
+    },
+    {
+      "path": "src\\pipeline",
+      "accessCount": 1,
+      "lastAccessed": 1780453189879,
+      "type": "directory"
     }
   ],
   "userDirectives": []

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-企业级 RAG 知识库平台。后端 Fastify + TypeScript，前端 Vue 3 + Vite。支持多知识库管理、文档摄入（PDF/Word/MD/TXT/XLSX/PPTX）、混合检索（向量 + BM25 + RRF 融合）、多轮对话（上下文改写）、SSE 流式输出、引用来源追溯与高亮、文档在线预览、对话搜索/导出/删除、答案反馈（赞/踩）、操作审计日志、API Key 鉴权、管理控制台（用户/KB/使用概览/审计/反馈统计）。
+企业级 RAG 知识库平台。后端 Fastify + TypeScript，前端 Vue 3 + Vite。支持多知识库管理、文档摄入（PDF/Word/MD/TXT/XLSX/PPTX）、混合检索（向量 + BM25 + RRF 融合）、多轮对话（上下文改写）、SSE 流式输出、引用来源追溯与高亮、文档在线预览、对话搜索/导出/删除、答案反馈（赞/踩）、操作审计日志、API Key 鉴权、管理控制台（用户/KB/使用概览/审计/反馈统计/使用趋势/AI 引擎/性能面板）、Redis 问答缓存、Cross-Encoder 精排、文档处理进度追踪与自动重试。
 
 ## 开发环境
 
@@ -65,7 +65,7 @@ npm run docker:restart
 | 向量库 | LanceDB（嵌入式，数据在 `data/lancedb/`） |
 | LLM | Ollama — Qwen2.5-7B（生成，`src/pipeline/generator.ts`），可选 DeepSeek API |
 | Embedding | Ollama — BGE-m3（1024 维，`src/pipeline/embedder.ts`） |
-| 缓存/BM25 | Redis（ioredis，`src/lib/redis.ts`） |
+| 缓存/BM25 | Redis（ioredis，`src/lib/redis.ts` + `src/lib/cache.ts` 问答缓存） |
 | 配置 | `.env` → Zod 校验 → `src/config.ts` |
 | 前端 | Vue 3 + Pinia + Vue Router，`client/` 目录独立 |
 
@@ -155,4 +155,4 @@ API Key 鉴权：用户可在设置页生成 `ak_` 前缀的 API Key（HMAC-SHA2
 - 消息反馈：`POST /api/messages/:id/feedback` upsert 切换赞/踩，`message_feedback` 表存储
 - 审计日志：`src/lib/audit.ts` → `logAudit()` 记录登录/创建KB/删除KB/上传文档/删除文档，fire-and-forget
 - API Key：HMAC-SHA256 哈希存储（`crypto.createHmac("sha256", JWT_SECRET)`），`authenticateApiKey` 中间件，chat 路由 JWT/API Key 双重鉴权，`SettingsPage.vue` 管理
-- 管理控制台：`AdminPage.vue` 5 个标签（使用概览/用户管理/KB管理/审计日志/反馈概览）
+- 管理控制台：`AdminPage.vue` 9 个标签（使用概览/用户管理/KB管理/审计日志/反馈概览/使用趋势/失败文档/AI 引擎/性能）
